@@ -19,8 +19,8 @@ var options={
 
 var gionni=new J5(options);
 console.log(gionni)
-// gionni.init().then(function(status){
-//  verb(status,'info','J5 init')
-// }).catch(function(err){
-//  verb(err,'error','J5 init')
-// })
+ gionni.init().then(function(status){
+  verb(status,'info','J5 init')
+ }).catch(function(err){
+  verb(err,'error','J5 init')
+ })
