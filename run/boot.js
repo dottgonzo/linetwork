@@ -8,14 +8,15 @@ var options={
     wpa_passphrase:'testpass'
   },
   mobile:{
-    {
+    provider:{
       "label":"Tre Ricaricabile","apn":"tre.it","phone":"*99#","username":"tre","password":"tre"
     },
-    {
+    options:{
       retry:false
     }
   }
 };
+
 var gionni=new J5(options);
 console.log(gionni)
 // gionni.init().then(function(status){

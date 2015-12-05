@@ -122,7 +122,7 @@ LNetwork.prototype.init=function(){
             resolve(answer)
           }).catch(function(err){
             if(config.mobile){
-              var mobile=new LMC(config.mobile)
+              var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
               linuxmobile.connect().then(function(){
                 resolve(answer)
               }).catch(function(){
@@ -141,7 +141,7 @@ LNetwork.prototype.init=function(){
           })
         } else{
           if(config.mobile){
-            var mobile=new LMC(config.mobile)
+            var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
             linuxmobile.connect().then(function(){
               resolve(answer)
             }).catch(function(err){
