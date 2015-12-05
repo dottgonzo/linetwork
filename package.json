@@ -1,0 +1,36 @@
+{
+  "name": "linetwork",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "#mocha",
+    "boot": "node run/boot.js",
+    "hw": "git add -A && git commit -m 'oki'&&npm version patch -m patch&&git add -A && git commit --amend -C HEAD&& git push&&npm publish",
+    "patch": "npm version patch -m patch&&git add -A && git commit --amend -C HEAD&& git push&&npm publish",
+    "prepublish": "npm test"
+    },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dottgonzo/linetwork.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dottgonzo/linetwork/issues"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "^2.3.4"
+  },
+  "dependencies": {
+    "hostapd_switch": "0.0.33",
+    "json-add": "0.0.1",
+    "linux-mobile-connection": "0.0.35",
+    "lodash": "^3.10.1",
+    "netw": "0.0.18",
+    "promise-test-connection": "0.0.2",
+    "promised-exec": "^1.0.1",
+    "verbo": "0.0.9"
+  }
+}
