@@ -10,7 +10,13 @@ _=require('lodash'),
 verb=require('verbo');
 
 
-function recovery_mode(options){
+function recovery_mode(config,dev){
+
+            var confhapds={
+              interface:dev,
+              hostapd:config.hostapd
+            }
+
   var apswitch=new hostapdswitch(confhapds);
   return new Promise(function(resolve,reject){
     apswitch.ap().then(function(answer){
@@ -127,7 +133,7 @@ LNetwork.prototype.init=function(){
                 resolve(answer)
               }).catch(function(){
                 if(options.recovery){
-                  recovery_mode(options).then(function(answer){
+                  recovery_mode(config,dev).then(function(answer){
                     resolve(answer)
                   }).catch(function(err){
                     verb(err,'error','J5 recovery mode start')
@@ -158,8 +164,8 @@ LNetwork.prototype.init=function(){
   })
 },
 
-LNetwork.prototype.recovery=function(){
-  return recovery_mode(this.config)
+LNetwork.prototype.recovery=function(dev){
+  return recovery_mode(this.config,dev)
 };
 
 
