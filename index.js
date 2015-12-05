@@ -73,6 +73,7 @@ console.log('dev mode')
 
     return new Promise(function(resolve,reject){
       netw().then(function(data){
+        console.log(data)
         _.map(data.networks,function(device){
           if(device.interfaceType=='wifi'){
             dev=device.interface
