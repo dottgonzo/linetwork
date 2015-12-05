@@ -70,7 +70,7 @@ console.log('dev mode')
     return apswitch.mode(mode)
   }else{
     console.log('auto mode')
-
+var config=this.config;
     return new Promise(function(resolve,reject){
       netw().then(function(data){
         console.log(data)
@@ -83,13 +83,9 @@ console.log('dev mode')
           var apswitch=new hostapdswitch(
             {
               interface:dev,
-              hostapd:this.hostapd
+              hostapd:config.hostapd
             }
           );
-          console.log({
-            interface:dev,
-            hostapd:this.hostapd
-          })
 
           console.log(apswitch)
           apswitch.mode(mode).then(function(answer){
