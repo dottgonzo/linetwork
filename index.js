@@ -88,11 +88,35 @@ var config=this.config;
           );
 
           console.log(apswitch)
-          apswitch.mode(mode).then(function(answer){
-            resolve(answer)
-          }).catch(function(err){
-            reject(err)
-          })
+
+          switch(mode){
+            case 'ap':{
+              apswitch.ap().then(function(answer){
+                resolve(answer)
+              }).catch(function(err){
+                reject(err)
+              })
+            },
+            case 'host':{
+              apswitch.host().then(function(answer){
+                resolve(answer)
+              }).catch(function(err){
+                reject(err)
+              })
+            },
+            case 'client':{
+              apswitch.client().then(function(answer){
+                resolve(answer)
+              }).catch(function(err){
+                reject(err)
+              })
+            }
+          }
+
+
+
+
+
         }else{
           reject({error:'no dev'})
         }
