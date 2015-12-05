@@ -66,9 +66,11 @@ console.log(mode,dev);
         }
       );
     }
-console.log('run mode')
+console.log('dev mode')
     return apswitch.mode(mode)
   }else{
+    console.log('auto mode')
+
     return new Promise(function(resolve,reject){
       netw().then(function(data){
         _.map(data.networks,function(device){
