@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
+    "push":"git add -A && git commit --amend -C HEAD && git push",
     "boot": "node run/boot.js",
     "wifiswitch-host": "node run/switch_host.js",
     "hw": "git add -A && git commit -m 'oki'&&npm version patch -m patch&&git add -A && git commit --amend -C HEAD&& git push&&npm publish",
