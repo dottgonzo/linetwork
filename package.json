@@ -1,11 +1,11 @@
 {
   "name": "linetwork",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "push":"git add -A && git commit -m 'fix' && git push",
+    "push": "git add -A && git commit -m 'fix' && git push",
     "boot": "node run/boot.js",
     "wifiswitch-host": "node run/switch_host.js",
     "hw": "git add -A && git commit -m 'oki' && npm version patch -m patch&&git add -A && git commit --amend -C HEAD&& git push&&npm publish",
