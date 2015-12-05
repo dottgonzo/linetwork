@@ -90,27 +90,30 @@ var config=this.config;
           console.log(apswitch)
 
           switch(mode){
-            case 'ap':{
+            case 'ap':
               apswitch.ap().then(function(answer){
                 resolve(answer)
               }).catch(function(err){
                 reject(err)
               })
-            },
-            case 'host':{
+              break;
+
+            case 'host':
               apswitch.host().then(function(answer){
                 resolve(answer)
               }).catch(function(err){
                 reject(err)
               })
-            },
-            case 'client':{
+              break;
+
+            case 'client':
               apswitch.client().then(function(answer){
                 resolve(answer)
               }).catch(function(err){
                 reject(err)
               })
-            }
+              break;
+
           }
 
 
