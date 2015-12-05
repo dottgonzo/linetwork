@@ -1,39 +1,14 @@
 var hostapdswitch=require('hostapd_switch'),
 Promise=require('promise'),
 testinternet=require('promise-test-connection'),
-PouchDB = require('pouchdb'),
-// npmAppsManager=require('npmAppsManager'),
 netw=require('netw'),
-mkdir=require('mkdir-p'),
 LMC=require('linux-mobile-connection'),
 mobileconnect=require('linux-mobile-connection'),
 merge=require('json-add'),
-//LOS=require('linux-online-status'),
-// timerdaemon=require('timerdaemon'),
+fs=require('fs'),
 _=require('lodash'),
-verb=require('verbo'),
+verb=require('verbo');
 
-
-
-
-if(!pathExists.sync(__dirname+'/db/')){
-  mkdir.sync(__dirname+'/db/');
-}
-var pdb=PouchDB.defaults({prefix: __dirname+'/db/'});
-app.use('/db', require('express-pouchdb')(pdb));
-app.use(express.static(__dirname +'/html'));
-
-
-app.get('/', function(req, res){
-  res.send('hello world');
-});
-
-function init_apps(options){
-  return new Promise(function(resolve,reject){
-    console.log('starting apps');
-    resolve(true)
-  })
-}
 
 function recovery_mode(options){
   var apswitch=new hostapdswitch(confhapds);
@@ -50,11 +25,12 @@ function recovery_mode(options){
 
 
 function LNetwork(data) {
+
+
   var config={
     recovery:true,
-    offlineApp:false, // avvia l'app solo in stato regular
     port:4000, // in modalità regular setta la porta per il manager
-    wpa_supplicant_path:'/etc/wpa_supplicant/wpa_supplicant.conf',
+    // wpa_supplicant_path:'/etc/wpa_supplicant/wpa_supplicant.conf',
     recovery_interface:'auto'
   }
 
@@ -62,7 +38,6 @@ function LNetwork(data) {
     merge(config,data)
   }
 
-  app.listen(config.port);
   this.config=config
 };
 
@@ -116,18 +91,15 @@ LNetwork.prototype.wifi_switch=function(mode,dev){
     })
   }
 },
-
+LNetwork.prototype.mproviders=function(){
+  return JSON.parse(fs.readFileSync(__dirname+'/node_modules/linux-mobile-connection/node_modules/wvdialjs/providers.json'))
+},
 
 LNetwork.prototype.init=function(){
   var config=this.config;
   return new Promise(function(resolve,reject){
-    testinternet().then(function(){
-      npmAppsManager.start().then(function(answer){
-        resolve(answer)
-      }).catch(function(err){
-        verb(err,'error','bootseq')
-        reject(err)
-      })
+    testinternet().then(function(answer){
+      resolve(answer)
     }).catch(function(){
       verb(err,'info','Tryng to connect')
       var wifi_exist=false
@@ -187,7 +159,7 @@ LNetwork.prototype.init=function(){
 },
 
 LNetwork.prototype.recovery=function(){
-  // return recovery_mode(this)
+  return recovery_mode(this.config)
 };
 
 
