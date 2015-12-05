@@ -104,8 +104,8 @@ LNetwork.prototype.mproviders=function(){
 LNetwork.prototype.init=function(){
   var config=this.config;
   return new Promise(function(resolve,reject){
-    testinternet().then(function(answer){
-      resolve(answer)
+    testinternet().then(function(){
+      resolve({connected:true})
     }).catch(function(){
       verb(err,'info','Tryng to connect')
       var wifi_exist=false
