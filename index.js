@@ -86,6 +86,11 @@ console.log('dev mode')
               hostapd:this.hostapd
             }
           );
+          console.log({
+            interface:dev,
+            hostapd:this.hostapd
+          })
+
           console.log(apswitch)
           apswitch.mode(mode).then(function(answer){
             resolve(answer)
