@@ -89,7 +89,7 @@ LNetwork.prototype.wifi_switch=function(mode,dev){
             reject(err)
           })
         }else{
-          reject(err)
+          reject({error:'no dev'})
         }
       }).catch(function(err){
         reject(err)
@@ -143,6 +143,13 @@ LNetwork.prototype.init=function(){
                   reject('no wlan host available')
                 }
               })
+            } else if(options.recovery){
+                recovery_mode(config,dev).then(function(answer){
+                  resolve(answer)
+                }).catch(function(err){
+                  verb(err,'error','J5 recovery mode start')
+                  reject(err)
+                })
             }
           })
         } else{
