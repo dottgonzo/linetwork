@@ -49,7 +49,7 @@ function LNetwork(data) {
 
 
 LNetwork.prototype.wifi_switch=function(mode,dev){
-
+console.log(mode,dev);
   if(dev||this.config.recovery_interface!='auto'){
     if (dev){
       var apswitch=new hostapdswitch(
@@ -66,7 +66,7 @@ LNetwork.prototype.wifi_switch=function(mode,dev){
         }
       );
     }
-
+console.log('run mode')
     return apswitch.mode(mode)
   }else{
     return new Promise(function(resolve,reject){
