@@ -142,7 +142,7 @@ LNetwork.prototype.init=function(){
       resolve({connected:true})
     }).catch(function(){
       verb(err,'info','Tryng to connect')
-      var wifi_exist=false
+      var wifi_exist=false;
       netw().then(function(data){
         console.log(data)
         // _.map(data.networks,function(device){
@@ -151,14 +151,14 @@ LNetwork.prototype.init=function(){
         //   wifi_exist=device.interface
         //   }
         // })
-        if(wifi_exist){
-
-          var confhapds={
-            interface:wifi_exist,
-            hostapd:config.hostapd
-          }
-
-          verb(wifi_exist,'info','Wlan interface founded');
+        // if(wifi_exist){
+        //
+        //   var confhapds={
+        //     interface:wifi_exist,
+        //     hostapd:config.hostapd
+        //   }
+        //
+        //   verb(wifi_exist,'info','Wlan interface founded');
           // var apswitch=new hostapdswitch(confhapds);
           // apswitch.client().then(function(answer){
           //   resolve(answer)
@@ -188,8 +188,8 @@ LNetwork.prototype.init=function(){
           //       })
           //   }
           // })
-        } else{
-          verb('no wifi','warn','networker')
+        // } else{
+        //   verb('no wifi','warn','networker')
 
           // if(config.mobile){
           //   var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
@@ -200,7 +200,7 @@ LNetwork.prototype.init=function(){
           //     reject(err)
           //   })
           // }
-        }
+        // }
       }).catch(function(err){
         verb(err,'error','J5 NETW ERROR!!')
         reject(err)
