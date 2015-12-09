@@ -159,35 +159,35 @@ LNetwork.prototype.init=function(){
           }
 
           verb(wifi_exist,'info','Wlan interface founded');
-          var apswitch=new hostapdswitch(confhapds);
-          apswitch.client().then(function(answer){
-            resolve(answer)
-          }).catch(function(err){
-            if(config.mobile){
-              var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
-              linuxmobile.connect().then(function(){
-                resolve(answer)
-              }).catch(function(){
-                if(options.recovery){
-                  recovery_mode(config,dev).then(function(answer){
-                    resolve(answer)
-                  }).catch(function(err){
-                    verb(err,'error','J5 recovery mode start')
-                    reject(err)
-                  })
-                } else{
-                  reject('no wlan host available')
-                }
-              })
-            } else if(options.recovery){
-                recovery_mode(config,dev).then(function(answer){
-                  resolve(answer)
-                }).catch(function(err){
-                  verb(err,'error','J5 recovery mode start')
-                  reject(err)
-                })
-            }
-          })
+          // var apswitch=new hostapdswitch(confhapds);
+          // apswitch.client().then(function(answer){
+          //   resolve(answer)
+          // }).catch(function(err){
+          //   if(config.mobile){
+          //     var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
+          //     linuxmobile.connect().then(function(){
+          //       resolve(answer)
+          //     }).catch(function(){
+          //       if(options.recovery){
+          //         recovery_mode(config,dev).then(function(answer){
+          //           resolve(answer)
+          //         }).catch(function(err){
+          //           verb(err,'error','J5 recovery mode start')
+          //           reject(err)
+          //         })
+          //       } else{
+          //         reject('no wlan host available')
+          //       }
+          //     })
+          //   } else if(options.recovery){
+          //       recovery_mode(config,dev).then(function(answer){
+          //         resolve(answer)
+          //       }).catch(function(err){
+          //         verb(err,'error','J5 recovery mode start')
+          //         reject(err)
+          //       })
+          //   }
+          // })
         } else{
           verb('no wifi','warn','networker')
 
