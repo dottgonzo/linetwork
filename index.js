@@ -146,7 +146,7 @@ if(err){
       var wifi_exist=false;
       console.log('??')
 
-      netw().then(function(net)) {
+      netw().then(function(net) {
 
 
         console.log(net.networks)
@@ -209,7 +209,10 @@ if(err){
             })
           }
         }
-      }
+
+  }).catch(function(err){
+    verb(err,'error','netw linuxmobile')
+    reject(err)
   })
 
 
