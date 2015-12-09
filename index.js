@@ -191,15 +191,15 @@ LNetwork.prototype.init=function(){
         } else{
           verb('no wifi','warn','networker')
 
-          if(config.mobile){
-            var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
-            linuxmobile.connect().then(function(){
-              resolve(answer)
-            }).catch(function(err){
-              verb(err,'error','J5 linuxmobile')
-              reject(err)
-            })
-          }
+          // if(config.mobile){
+          //   var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
+          //   linuxmobile.connect().then(function(){
+          //     resolve(answer)
+          //   }).catch(function(err){
+          //     verb(err,'error','J5 linuxmobile')
+          //     reject(err)
+          //   })
+          // }
         }
       }).catch(function(err){
         verb(err,'error','J5 NETW ERROR!!')
