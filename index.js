@@ -139,7 +139,7 @@ LNetwork.prototype.init=function(){
   return new Promise(function(resolve,reject){
     verb(config,'debug','Tryng to connect')
     network.get_gateway_ip(function(err, ip) {
-
+console.log(err,ip)
 if(err && !ip){
 
       verb(err,'info','Tryng to connect')
