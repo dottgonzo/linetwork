@@ -145,12 +145,12 @@ LNetwork.prototype.init=function(){
       var wifi_exist=false
       netw().then(function(data){
         console.log(data)
-        _.map(data.networks,function(device){
-         if(device.interfaceType=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
-
-          wifi_exist=device.interface
-          }
-        })
+        // _.map(data.networks,function(device){
+        //  if(device.interfaceType=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
+        //
+        //   wifi_exist=device.interface
+        //   }
+        // })
         if(wifi_exist){
 
           var confhapds={
