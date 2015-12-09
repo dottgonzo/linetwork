@@ -136,6 +136,8 @@ LNetwork.prototype.mproviders=function(){
 LNetwork.prototype.init=function(){
   var config=this.config;
   return new Promise(function(resolve,reject){
+    verb('start','debug','Tryng to connect')
+
     testinternet().then(function(){
       resolve({connected:true})
     }).catch(function(){
