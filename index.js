@@ -140,7 +140,7 @@ LNetwork.prototype.init=function(){
     verb(config,'debug','Tryng to connect')
     network.get_gateway_ip(function(err, ip) {
 
-if(err){
+if(err && !ip){
 
       verb(err,'info','Tryng to connect')
       var wifi_exist=false;
