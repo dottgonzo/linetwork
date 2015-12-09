@@ -189,6 +189,8 @@ LNetwork.prototype.init=function(){
             }
           })
         } else{
+          verb('no wifi','warn','networker')
+
           if(config.mobile){
             var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
             linuxmobile.connect().then(function(){
