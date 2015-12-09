@@ -138,9 +138,9 @@ LNetwork.prototype.init=function(){
   var config=this.config;
   return new Promise(function(resolve,reject){
     verb(config,'debug','Tryng to connect')
-    network.get_gateway_ip(function(err, ip) {
+    network.get_public_ip(function(err, ip) {
 console.log(err,ip)
-if(err && !ip){
+if(err){
 
       verb(err,'info','Tryng to connect')
       var wifi_exist=false;
