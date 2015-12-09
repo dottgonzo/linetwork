@@ -151,10 +151,10 @@ LNetwork.prototype.init=function(){
 
 
         console.log(list)
-        // _.map(data.networks,function(device){
-        //  if(device.interfaceType=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
+        // _.map(list,function(device){
+        //  if(device.type=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
         //
-        //   wifi_exist=device.interface
+        //   wifi_exist=device.name
         //   }
         // })
         // if(wifi_exist){
@@ -208,6 +208,7 @@ LNetwork.prototype.init=function(){
           // }
         // }
       }
+  })
 
 
     })
