@@ -22,5 +22,6 @@ console.log(gionni)
  gionni.init().then(function(status){
   verb(status,'info','J5 init')
  }).catch(function(err){
+   console.log('error')
   verb(err,'error','J5 init')
  })
