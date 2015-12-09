@@ -138,10 +138,10 @@ LNetwork.prototype.init=function(){
   var config=this.config;
   return new Promise(function(resolve,reject){
     verb(config,'debug','Tryng to connect')
+    network.get_gateway_ip(function(err, ip) {
 
-    testinternet().then(function(){
-      resolve({connected:true})
-    }).catch(function(){
+if(err){
+
       verb(err,'info','Tryng to connect')
       var wifi_exist=false;
       console.log('??')
@@ -218,8 +218,13 @@ LNetwork.prototype.init=function(){
   })
 
 
+}else{
+  resolve({connected:true})
+
+}
+
     })
-  })
+    })
 },
 
 LNetwork.prototype.recovery=function(dev){
