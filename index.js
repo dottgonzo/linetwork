@@ -146,20 +146,15 @@ if(err){
       var wifi_exist=false;
       console.log('??')
 
-      network.get_interfaces_list(function(err, list) {
-        console.log('!!')
-
-        if(err){
-          console.log('err')
-        reject(err)
-        } else{
+      netw().then(function(net)) {
 
 
-        console.log(list)
+        console.log(net.networks)
 
 
-        _.map(list,function(device){
-         if(device.type=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.name) )){
+        _.map(net.networks,function(device){
+          console.log(device.interface,config.recovery_interface,device.name);
+         if(device.interfaceType=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
 
           wifi_exist=device.name
           }
