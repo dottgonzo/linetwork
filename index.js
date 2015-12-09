@@ -154,13 +154,14 @@ if(err){
 
         _.map(net.networks,function(device){
 
-         if(device.interfaceType=='wifi' && (!config.recovery_interface || config.recovery_interface == device.interface)){
+         if(device.interfaceType=='wifi' && (!config.recovery_interface || config.recovery_interface == 'auto' || config.recovery_interface == device.interface)){
 
           wifi_exist=device.interface
           }
         })
-        if(wifi_exist){
+        console.log(wifi_exist)
 
+        if(wifi_exist){
           var confhapds={
             interface:wifi_exist,
             hostapd:config.hostapd
