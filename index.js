@@ -20,7 +20,7 @@ function recovery_mode(config,dev){
 
   var apswitch=new hostapdswitch(confhapds);
   return new Promise(function(resolve,reject){
-    apswitch.ap().then(function(answer){
+    apswitch.host().then(function(answer){
       verb(err,'warn','linetwork recovery mode')
       resolve(answer)
     }).catch(function(err){
@@ -177,7 +177,7 @@ if(err){
                 resolve(answer)
               }).catch(function(){
                 if(options.recovery){
-                  recovery_mode(config,dev).then(function(answer){
+                  recovery_mode(config,wifi_exist).then(function(answer){
                     resolve(answer)
                   }).catch(function(err){
                     verb(err,'error','J5 recovery mode start')
