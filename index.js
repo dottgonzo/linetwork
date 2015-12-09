@@ -173,8 +173,7 @@ if(err){
             resolve(answer)
           }).catch(function(err){
             if(config.mobile){
-              var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
-              linuxmobile.connect().then(function(){
+              LMC(config.mobile.provider,config.mobile.options).then(function(answer){
                 resolve(answer)
               }).catch(function(){
                 if(options.recovery){
@@ -201,8 +200,7 @@ if(err){
           verb('no wifi','warn','networker')
 
           if(config.mobile){
-            var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
-            linuxmobile.connect().then(function(){
+            LMC(config.mobile.provider,config.mobile.options).then(function(answer){
               resolve(answer)
             }).catch(function(err){
               verb(err,'error','J5 linuxmobile')
@@ -215,9 +213,8 @@ if(err){
     verb(err,'error','netw linuxmobile')
     reject(err)
   })
-
-
 }else{
+
   resolve({connected:true})
 
 }
