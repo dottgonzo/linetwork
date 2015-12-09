@@ -156,64 +156,64 @@ if(err){
 
 
         console.log(list)
-        resolve({connected:true})
 
-        // _.map(list,function(device){
-        //  if(device.type=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
-        //
-        //   wifi_exist=device.name
-        //   }
-        // })
-        // if(wifi_exist){
-        //
-        //   var confhapds={
-        //     interface:wifi_exist,
-        //     hostapd:config.hostapd
-        //   }
-        //
-        //   verb(wifi_exist,'info','Wlan interface founded');
-          // var apswitch=new hostapdswitch(confhapds);
-          // apswitch.client().then(function(answer){
-          //   resolve(answer)
-          // }).catch(function(err){
-          //   if(config.mobile){
-          //     var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
-          //     linuxmobile.connect().then(function(){
-          //       resolve(answer)
-          //     }).catch(function(){
-          //       if(options.recovery){
-          //         recovery_mode(config,dev).then(function(answer){
-          //           resolve(answer)
-          //         }).catch(function(err){
-          //           verb(err,'error','J5 recovery mode start')
-          //           reject(err)
-          //         })
-          //       } else{
-          //         reject('no wlan host available')
-          //       }
-          //     })
-          //   } else if(options.recovery){
-          //       recovery_mode(config,dev).then(function(answer){
-          //         resolve(answer)
-          //       }).catch(function(err){
-          //         verb(err,'error','J5 recovery mode start')
-          //         reject(err)
-          //       })
-          //   }
-          // })
-        // } else{
-        //   verb('no wifi','warn','networker')
 
-          // if(config.mobile){
-          //   var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
-          //   linuxmobile.connect().then(function(){
-          //     resolve(answer)
-          //   }).catch(function(err){
-          //     verb(err,'error','J5 linuxmobile')
-          //     reject(err)
-          //   })
-          // }
-        // }
+        _.map(list,function(device){
+         if(device.type=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.name) )){
+
+          wifi_exist=device.name
+          }
+        })
+        if(wifi_exist){
+
+          var confhapds={
+            interface:wifi_exist,
+            hostapd:config.hostapd
+          }
+
+          verb(wifi_exist,'info','Wlan interface founded');
+          var apswitch=new hostapdswitch(confhapds);
+          apswitch.client().then(function(answer){
+            resolve(answer)
+          }).catch(function(err){
+            if(config.mobile){
+              var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
+              linuxmobile.connect().then(function(){
+                resolve(answer)
+              }).catch(function(){
+                if(options.recovery){
+                  recovery_mode(config,dev).then(function(answer){
+                    resolve(answer)
+                  }).catch(function(err){
+                    verb(err,'error','J5 recovery mode start')
+                    reject(err)
+                  })
+                } else{
+                  reject('no wlan host available')
+                }
+              })
+            } else if(options.recovery){
+                recovery_mode(config,dev).then(function(answer){
+                  resolve(answer)
+                }).catch(function(err){
+                  verb(err,'error','J5 recovery mode start')
+                  reject(err)
+                })
+            }
+          })
+        } else{
+          verb('no wifi','warn','networker')
+
+          if(config.mobile){
+            var linuxmobile=new LMC(config.mobile.provider,config.mobile.options)
+            linuxmobile.connect().then(function(){
+              resolve(answer)
+            }).catch(function(err){
+              verb(err,'error','J5 linuxmobile')
+              reject(err)
+            })
+          }
+        }
       }
   })
 
