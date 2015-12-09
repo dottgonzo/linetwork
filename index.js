@@ -146,8 +146,8 @@ LNetwork.prototype.init=function(){
       netw().then(function(data){
         console.log(data)
         _.map(data.networks,function(device){
-        //  if(device.interfaceType=='wifi' && (config.recovery_interface == 'auto' || (config.recovery_interface && config.recovery_interface == device.interface)) ){
-                      if(device.interfaceType=='wifi' ){
+         if(device.interfaceType=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
+
           wifi_exist=device.interface
           }
         })
@@ -158,7 +158,7 @@ LNetwork.prototype.init=function(){
             hostapd:config.hostapd
           }
 
-          verb(err,'info','Wlan interface founded');
+          verb(wifi_exist,'info','Wlan interface founded');
           var apswitch=new hostapdswitch(confhapds);
           apswitch.client().then(function(answer){
             resolve(answer)
