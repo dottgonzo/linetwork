@@ -144,13 +144,20 @@ LNetwork.prototype.init=function(){
     }).catch(function(){
       verb(err,'info','Tryng to connect')
       var wifi_exist=false;
+      console.log('??')
+
       network.get_interfaces_list(function(err, list) {
+        console.log('!!')
+
         if(err){
+          console.log('err')
         reject(err)
         } else{
 
 
         console.log(list)
+        resolve({connected:true})
+
         // _.map(list,function(device){
         //  if(device.type=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
         //
