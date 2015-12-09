@@ -2,6 +2,7 @@ var hostapdswitch=require('hostapd_switch'),
 Promise=require('promise'),
 testinternet=require('promise-test-connection'),
 netw=require('netw'),
+network=require('network'),
 LMC=require('linux-mobile-connection'),
 mobileconnect=require('linux-mobile-connection'),
 merge=require('json-add'),
@@ -143,8 +144,13 @@ LNetwork.prototype.init=function(){
     }).catch(function(){
       verb(err,'info','Tryng to connect')
       var wifi_exist=false;
-      netw().then(function(data){
-        console.log(data)
+      network.get_interfaces_list(function(err, list) {
+        if(err){
+        reject(err)
+        } else{
+
+
+        console.log(list)
         // _.map(data.networks,function(device){
         //  if(device.interfaceType=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
         //
@@ -201,10 +207,9 @@ LNetwork.prototype.init=function(){
           //   })
           // }
         // }
-      }).catch(function(err){
-        verb(err,'error','J5 NETW ERROR!!')
-        reject(err)
-      })
+      }
+
+
     })
   })
 },
