@@ -139,12 +139,12 @@ LNetwork.prototype.init=function(){
   return new Promise(function(resolve,reject){
     verb(config,'debug','Tryng to connect')
     network.get_public_ip(function(err, ip) {
-console.log(err,ip)
+
 if(err){
 
-      verb(err,'info','Tryng to connect')
+
       var wifi_exist=false;
-      console.log('??')
+
 
       netw().then(function(net) {
 
@@ -153,8 +153,8 @@ if(err){
 
 
         _.map(net.networks,function(device){
-          console.log(device.interface,config.recovery_interface,device.name);
-         if(device.interfaceType=='wifi' && (!config.recovery_interface || (config.recovery_interface && config.recovery_interface == device.interface) )){
+          console.log(device.interface,config.recovery_interface,device.interfaceType);
+         if(device.interfaceType=='wifi' && (!config.recovery_interface || config.recovery_interface == device.interface)){
 
           wifi_exist=device.name
           }
