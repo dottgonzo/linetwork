@@ -146,7 +146,8 @@ LNetwork.prototype.init=function(){
       netw().then(function(data){
         console.log(data)
         _.map(data.networks,function(device){
-          if(device.interfaceType=='wifi' && (config.recovery_interface == 'auto' || (config.recovery_interface && config.recovery_interface == device.interface)) ){
+        //  if(device.interfaceType=='wifi' && (config.recovery_interface == 'auto' || (config.recovery_interface && config.recovery_interface == device.interface)) ){
+                      if(device.interfaceType=='wifi' ){
           wifi_exist=device.interface
           }
         })
