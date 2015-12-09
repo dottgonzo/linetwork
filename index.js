@@ -153,10 +153,10 @@ if(err){
 
 
         _.map(net.networks,function(device){
-          console.log(device.interface,config.recovery_interface,device.interfaceType);
+
          if(device.interfaceType=='wifi' && (!config.recovery_interface || config.recovery_interface == device.interface)){
 
-          wifi_exist=device.name
+          wifi_exist=device.interface
           }
         })
         if(wifi_exist){
