@@ -1,6 +1,6 @@
-var J5=require('../index'),
-verb=require('verbo');
-var options={
+import linet=require('../index');
+let verb=require('verbo');
+let options={
   port:4000,
   hostapd:{
     driver:'rtl871xdrv',
@@ -17,10 +17,11 @@ var options={
   }
 };
 
-var gionni=new J5(options);
-console.log(gionni)
- gionni.wifi_switch('host').then(function(status){
+let gionni=new linet(options);
+
+ gionni.recovery().then(function(status){
   verb(status,'info','J5 init')
  }).catch(function(err){
+   console.log('error')
   verb(err,'error','J5 init')
  })
