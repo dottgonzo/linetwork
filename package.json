@@ -1,6 +1,6 @@
 {
   "name": "linetwork",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -45,7 +45,7 @@
     "linux-mobile-connection": "0.0.50",
     "lodash": "^3.10.1",
     "netw": "0.0.52",
-    "promise-test-connection": "0.0.12",
+    "promise-test-connection": "0.0.20",
     "promised-exec": "^1.0.1",
     "verbo": "0.0.9"
   }
