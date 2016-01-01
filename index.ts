@@ -310,12 +310,12 @@ export =class LiNetwork {
     };
 
     recovery = function() {
-        let config=this.config
+        let config=this.config;
 
         return new Promise(function(resolve, reject) {
             getinterfa(config.recovery_interface).then(function(interf: IDevice) {
                 let wifi_exist: string = interf.interface;
-                recovery_mode(this.config, wifi_exist).then(function(answer) {
+                recovery_mode(config, wifi_exist).then(function(answer) {
                     resolve(answer)
                 }).catch(function(err) {
                     reject(err)
