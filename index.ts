@@ -41,10 +41,13 @@ function getinterfa(setted?: string) {
 
 
 function recovery_mode(config: ILiNetworkConf, dev: string,mode?:string) {
+let m:string;
 
-
-if(!mode){
-    let mode='host';
+if(mode){
+         m=mode;
+    
+}else{
+     m='host';
 }
 
     let confhapds = {
@@ -55,7 +58,7 @@ if(!mode){
     let apswitch = new hostapdswitch(confhapds);
 
     return new Promise(function(resolve, reject) {
-        apswitch[mode]().then(function(answer) {
+        apswitch[m]().then(function(answer) {
             verb(answer, 'warn', 'linetwork recovery mode')
             resolve(answer)
         }).catch(function(err) {
