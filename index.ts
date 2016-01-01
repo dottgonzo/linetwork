@@ -40,15 +40,15 @@ function getinterfa(setted?: string) {
 }
 
 
-function recovery_mode(config: ILiNetworkConf, dev: string,mode?:string) {
-let m:string;
+function recovery_mode(config: ILiNetworkConf, dev: string, mode?: string) {
+    let m: string;
 
-if(mode){
-         m=mode;
-    
-}else{
-     m='host';
-}
+    if (mode) {
+        m = mode;
+
+    } else {
+        m = 'host';
+    }
 
     let confhapds = {
         interface: dev,
@@ -317,13 +317,13 @@ export =class LiNetwork {
         })
     };
 
-    recovery = function(mode?:string) {
-        let config=this.config;
+    recovery = function(mode?: string) {
+        let config = this.config;
 
         return new Promise(function(resolve, reject) {
             getinterfa(config.recovery_interface).then(function(interf: IDevice) {
                 let wifi_exist: string = interf.interface;
-                recovery_mode(config, wifi_exist,mode).then(function(answer) {
+                recovery_mode(config, wifi_exist, mode).then(function(answer) {
                     resolve(answer)
                 }).catch(function(err) {
                     reject(err)
