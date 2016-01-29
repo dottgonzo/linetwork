@@ -199,6 +199,7 @@ export =class LiNetwork {
                         }
                     });
                     if (dev) {
+
                         var apswitch = new hostapdswitch(
                             {
                                 interface: dev,
@@ -270,7 +271,7 @@ export =class LiNetwork {
 
                     verb(wifi_exist, "info", "Wlan interface founded");
                     let apswitch = new hostapdswitch(confhapds);
-                    apswitch.client(true,true).then(function(answer) {
+                    apswitch.client(true, true).then(function(answer) {
                         resolve(answer);
                     }).catch(function(err) {
                         if (config.mobile) {
