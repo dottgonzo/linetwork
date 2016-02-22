@@ -100,7 +100,7 @@ interface ClassOpt {
     port: number;
     recovery_interface?: string;
     mobile?: IMobile;
-    hostapd?: IHostapd;
+    hostapd?: IHostapdcf;
     wpasupplicant_path?: string;
 }
 interface IMobile {
@@ -122,6 +122,11 @@ interface ILiNetworkConf {
 }
 interface IHostapd {
     driver: string;
+    ssid: string;
+    wpa_passphrase: any;
+};
+interface IHostapdcf {
+    driver?: string;
     ssid: string;
     wpa_passphrase: any;
 };
