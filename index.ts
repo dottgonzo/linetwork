@@ -2,6 +2,8 @@ import * as Promise from "bluebird";
 import * as fs from "fs";
 import * as _ from "lodash";
 
+import Providers = require("mobile-providers");
+import Wpamanager = require("wpasupplicant-manager");
 import hostapdswitch = require("hostapd_switch");
 import testinternet = require("promise-test-connection");
 import merge = require("json-add");
@@ -171,18 +173,21 @@ let config: ILiNetworkConf = {
 
 
 class LiNetwork {
-    config: ILiNetworkConf;
+    liconfig: ILiNetworkConf;
     hostapd: IHConf;
     constructor(data: ClassOpt) {
+
         merge(config, data);
-        this.config = config;
+
+
+        this.liconfig = config;
     }
     mobileconnect() {
 
         return new Promise<boolean>(function(resolve, reject) {
-            if (this.config.mobile) {
+            if (this.liconfig.mobile) {
 
-                LMC(this.config.mobile.provider, this.config.mobile.options).then(function(answer) {
+                LMC(this.liconfig.mobile.provider, this.liconfig.mobile.options).then(function(answer) {
                     resolve(answer);
                 }).catch(function(err) {
                     verb(err, "error", "J5 linuxmobile");
@@ -197,10 +202,22 @@ class LiNetwork {
         });
 
     };
+    
+    wpamanager(){
+        
+        return new Wpamanager(this.liconfig.wpasupplicant_path)
+        
+    }
+
+    mobileproviders(){
+        
+        return new Providers()
+        
+    }
 
     wifi_switch(mode: string, dev?: string) {
         console.log(mode, dev);
-        if (dev || this.config.recovery_interface != "auto") {
+        if (dev || this.liconfig.recovery_interface != "auto") {
             if (dev) {
                 var apswitch = new hostapdswitch(
                     {
@@ -213,7 +230,7 @@ class LiNetwork {
             } else {
                 var apswitch = new hostapdswitch(
                     {
-                        interface: this.config.recovery_interface,
+                        interface: this.liconfig.recovery_interface,
                         wpasupplicant_path: config.wpasupplicant_path,
                         hostapd: this.hostapd
                     }
@@ -252,7 +269,7 @@ class LiNetwork {
 
         } else {
             console.log("auto mode");
-            var config = this.config;
+            var config = this.liconfig;
             return new Promise(function(resolve, reject) {
                 netw().then(function(data) {
                     console.log(data);
@@ -314,7 +331,7 @@ class LiNetwork {
     };
 
     connection(recovery?: boolean) {
-        let config = this.config;
+        let config = this.liconfig;
         return new Promise<IInit>(function(resolve, reject) {
             verb(config, "debug", "Tryng to connect");
 
@@ -335,7 +352,7 @@ class LiNetwork {
                     };
 
                     verb(wifi_exist, "info", "Wlan interface founded");
-                    let apswitch = new hostapdswitch(confhapds,true);
+                    let apswitch = new hostapdswitch(confhapds, true);
                     apswitch.client(true, true).then(function(answer) {
                         resolve({ conection: true, recovery: false });
                     }).catch(function(err) {
@@ -384,7 +401,7 @@ class LiNetwork {
     };
 
     recovery(mode?: string) {
-        let config = this.config;
+        let config = this.liconfig;
 
         return new Promise(function(resolve, reject) {
             getinterfa(config.recovery_interface).then(function(interf: IDevice) {
