@@ -1,18 +1,39 @@
-import hostapdswitch = require("hostapd_switch");
 import * as Promise from "bluebird";
 import * as fs from "fs";
 import * as _ from "lodash";
+
+import hostapdswitch = require("hostapd_switch");
 import testinternet = require("promise-test-connection");
 import merge = require("json-add");
+import LMC = require("linux-mobile-connection");
+
 let netw = require("netw");
-let LMC = require("linux-mobile-connection");
-let mobileconnect = require("linux-mobile-connection");
 let verb = require("verbo");
+
+
+
+
+
+interface IProvider {
+
+    label?: string;
+    apn: string;
+    phone?: string
+    username?: string;
+    password?: string;
+
+}
+
+interface IGlobalProviders {
+
+    country: string;
+    providers: IProvider[];
+}
 
 
 function getinterfa(setted?: string) {
 
-    return new Promise(function(resolve, reject) {
+    return new Promise<IDevice>(function(resolve, reject) {
         let wifi_exist: any = false;
         let devi: IDevice;
         netw().then(function(net) {
@@ -52,15 +73,16 @@ function recovery_mode(config: ILiNetworkConf, dev: string, mode?: string) {
 
     let confhapds = {
         interface: dev,
+        wpasupplicant_path: config.wpasupplicant_path,
         hostapd: config.hostapd
     };
 
     let apswitch = new hostapdswitch(confhapds);
 
-    return new Promise(function(resolve, reject) {
+    return new Promise<boolean>(function(resolve, reject) {
         apswitch[m]().then(function(answer) {
             verb(answer, "warn", "linetwork recovery mode");
-            resolve(answer);
+            resolve(true);
         }).catch(function(err) {
             verb(err, "error", "linetwork recovery mode failed");
             reject(err);
@@ -75,31 +97,62 @@ interface IDevice {
 }
 
 interface ClassOpt {
-    recovery?: boolean;
-    port?: number;
+    port: number;
     recovery_interface?: string;
+    mobile?: IMobile;
+    hostapd?: IHostapd;
+    wpasupplicant_path?: string;
 }
 interface IMobile {
-    provider?: {
-
-    };
+    provider?: IProvider;
     options?: {
+        verbose?: boolean;
+        wvdialFile?: string;
+        dev?: any;
+        ifOffline?: boolean;
+        retry?: boolean;
     };
 }
 interface ILiNetworkConf {
-    recovery: boolean;
     port: number;
     recovery_interface: string;
     mobile?: IMobile;
-    hostapd: {
-        driver: string,
-        ssid: string,
-        wpa_passphrase: string,
-    };
+    hostapd: IHostapd;
+    wpasupplicant_path?: string;
+}
+interface IHostapd {
+    driver: string;
+    ssid: string;
+    wpa_passphrase: any;
+};
+interface IDnsmasq {
+    interface: string;
+};
+
+interface IHConf {
+    interface: string;
+    wpasupplicant_path: string;
+    hostapd: IHostapd;
+    dnsmasq: IDnsmasq;
+    redirect: boolean;
+};
+
+interface IConnection {
+
+    linkType: string;
+    interface: string;
+    ip?: string;
+    gateway?: string;
+
+}
+
+interface IInit {
+    conection: boolean;
+    recovery: boolean;
+    details?: IConnection;
 }
 
 let config: ILiNetworkConf = {
-    recovery: true,
     port: 4000, // in modalità regular setta la porta per il manager
     // wpa_supplicant_path:'/etc/wpa_supplicant/wpa_supplicant.conf',
     hostapd: {
@@ -107,19 +160,21 @@ let config: ILiNetworkConf = {
         ssid: "testttap",
         wpa_passphrase: "testpass"
     },
-    recovery_interface: "auto"
+    recovery_interface: "auto",
+    wpasupplicant_path: "/etc/wpa_supplicant/wpa_supplicant.conf"
 };
 
 
-export =class LiNetwork {
+class LiNetwork {
     config: ILiNetworkConf;
-    constructor(public data?: ClassOpt) {
+    hostapd: IHConf;
+    constructor(data: ClassOpt) {
         merge(config, data);
         this.config = config;
     }
-    mobileconnect = function() {
+    mobileconnect() {
 
-        return new Promise(function(resolve, reject) {
+        return new Promise<boolean>(function(resolve, reject) {
             if (this.config.mobile) {
 
                 LMC(this.config.mobile.provider, this.config.mobile.options).then(function(answer) {
@@ -138,30 +193,33 @@ export =class LiNetwork {
 
     };
 
-    wifi_switch = function(mode: string, dev?: string) {
+    wifi_switch(mode: string, dev?: string) {
         console.log(mode, dev);
         if (dev || this.config.recovery_interface != "auto") {
             if (dev) {
                 var apswitch = new hostapdswitch(
                     {
                         interface: dev,
+                        wpasupplicant_path: config.wpasupplicant_path,
                         hostapd: this.hostapd
+
                     }
                 );
             } else {
                 var apswitch = new hostapdswitch(
                     {
                         interface: this.config.recovery_interface,
+                        wpasupplicant_path: config.wpasupplicant_path,
                         hostapd: this.hostapd
                     }
                 );
             }
             console.log("dev mode");
-            return new Promise(function(resolve, reject) {
+            return new Promise<boolean>(function(resolve, reject) {
                 switch (mode) {
                     case "ap":
                         apswitch.ap().then(function(answer) {
-                            resolve(answer);
+                            resolve(true);
                         }).catch(function(err) {
                             reject(err);
                         });
@@ -169,7 +227,7 @@ export =class LiNetwork {
 
                     case "host":
                         apswitch.host().then(function(answer) {
-                            resolve(answer);
+                            resolve(true);
                         }).catch(function(err) {
                             reject(err);
                         });
@@ -177,7 +235,7 @@ export =class LiNetwork {
 
                     case "client":
                         apswitch.client().then(function(answer) {
-                            resolve(answer);
+                            resolve(true);
                         }).catch(function(err) {
                             reject(err);
                         });
@@ -203,7 +261,8 @@ export =class LiNetwork {
                         var apswitch = new hostapdswitch(
                             {
                                 interface: dev,
-                                hostapd: config.hostapd
+                                hostapd: config.hostapd,
+                                wpasupplicant_path: config.wpasupplicant_path
                             }
                         );
 
@@ -212,7 +271,7 @@ export =class LiNetwork {
                         switch (mode) {
                             case "ap":
                                 apswitch.ap().then(function(answer) {
-                                    resolve(answer);
+                                    resolve(true);
                                 }).catch(function(err) {
                                     reject(err);
                                 });
@@ -220,7 +279,7 @@ export =class LiNetwork {
 
                             case "host":
                                 apswitch.host().then(function(answer) {
-                                    resolve(answer);
+                                    resolve(true);
                                 }).catch(function(err) {
                                     reject(err);
                                 });
@@ -228,7 +287,7 @@ export =class LiNetwork {
 
                             case "client":
                                 apswitch.client().then(function(answer) {
-                                    resolve(answer);
+                                    resolve(true);
                                 }).catch(function(err) {
                                     reject(err);
                                 });
@@ -245,18 +304,18 @@ export =class LiNetwork {
         }
     };
 
-    mproviders = function() {
+    mproviders(): IGlobalProviders[] {
         return JSON.parse(fs.readFileSync(__dirname + "/node_modules/linux-mobile-connection/node_modules/wvdialjs/providers.json", "utf-8"));
     };
 
-    init = function() {
-        let config: ILiNetworkConf = this.config;
-        return new Promise(function(resolve, reject) {
+    connection(recovery?: boolean) {
+        let config = this.config;
+        return new Promise<IInit>(function(resolve, reject) {
             verb(config, "debug", "Tryng to connect");
 
 
             testinternet().then(function() {
-                resolve({ connected: true });
+                resolve({ conection: true, recovery: false });
             }).catch(function() {
 
 
@@ -266,21 +325,22 @@ export =class LiNetwork {
 
                     let confhapds = {
                         interface: wifi_exist,
+                        wpasupplicant_path: config.wpasupplicant_path,
                         hostapd: config.hostapd
                     };
 
                     verb(wifi_exist, "info", "Wlan interface founded");
-                    let apswitch = new hostapdswitch(confhapds);
+                    let apswitch = new hostapdswitch(confhapds,true);
                     apswitch.client(true, true).then(function(answer) {
-                        resolve(answer);
+                        resolve({ conection: true, recovery: false });
                     }).catch(function(err) {
                         if (config.mobile) {
                             LMC(config.mobile.provider, config.mobile.options).then(function(answer) {
-                                resolve(answer);
+                                resolve({ conection: true, recovery: false });
                             }).catch(function() {
-                                if (config.recovery) {
+                                if (recovery) {
                                     recovery_mode(config, wifi_exist).then(function(answer) {
-                                        resolve(answer);
+                                        resolve({ conection: false, recovery: true });
                                     }).catch(function(err) {
                                         verb(err, "error", "J5 recovery mode start");
                                         reject(err);
@@ -289,9 +349,9 @@ export =class LiNetwork {
                                     reject("no wlan host available");
                                 }
                             });
-                        } else if (config.recovery) {
+                        } else if (recovery) {
                             recovery_mode(config, wifi_exist).then(function(answer) {
-                                resolve(answer);
+                                resolve({ conection: false, recovery: true });
                             }).catch(function(err) {
                                 verb(err, "error", "J5 recovery mode start");
                                 reject(err);
@@ -304,7 +364,7 @@ export =class LiNetwork {
 
                     if (config.mobile) {
                         LMC(config.mobile.provider, config.mobile.options).then(function(answer) {
-                            resolve(answer);
+                            resolve({ conection: true, recovery: false });
                         }).catch(function(err) {
                             verb(err, "error", "J5 linuxmobile");
                             reject(err);
@@ -318,7 +378,7 @@ export =class LiNetwork {
         });
     };
 
-    recovery = function(mode?: string) {
+    recovery(mode?: string) {
         let config = this.config;
 
         return new Promise(function(resolve, reject) {
@@ -341,3 +401,4 @@ export =class LiNetwork {
 
 
 
+export = LiNetwork;
