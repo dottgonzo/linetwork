@@ -9,9 +9,29 @@ import testinternet = require("promise-test-connection");
 import merge = require("json-add");
 import LMC = require("linux-mobile-connection");
 
-let netw = require("netw");
+let netw: netw = require("netw");
 let verb = require("verbo");
 
+
+interface netw {
+    (): Promise<Network[]>
+}
+
+interface Scan {
+    essid: string;
+    mac: string;
+    signal: string;
+}
+
+interface Network {
+    type: string;
+    mac: string;
+    interface: string;
+    essid?: string;
+    scan?: Scan[];
+    ip?: string;
+    gateway?: string;
+}
 
 
 
@@ -38,9 +58,9 @@ function getinterfa(setted?: string) {
     return new Promise<IDevice>(function(resolve, reject) {
         let wifi_exist: any = false;
         let devi: IDevice;
-        netw().then(function(net) {
+        netw().then(function(networks) {
 
-            _.map(net.networks, function(device: IDevice) {
+            _.map(networks, function(device: IDevice) {
 
                 if (device.type == "wifi" && (!setted || setted == "auto" || setted == device.interface)) {
                     wifi_exist = device.interface;
@@ -202,17 +222,23 @@ class LiNetwork {
         });
 
     };
-    
-    wpamanager(){
-        
-        return new Wpamanager(this.liconfig.wpasupplicant_path)
-        
+
+    wpamanager() {
+
+        return new Wpamanager(this.liconfig.wpasupplicant_path);
+
     }
 
-    mobileproviders(){
-        
+    networks() {
+
+        return netw();
+
+    }
+
+    mobileproviders() {
+
         return new Providers()
-        
+
     }
 
     wifi_switch(mode: string, dev?: string) {
@@ -271,9 +297,9 @@ class LiNetwork {
             console.log("auto mode");
             var config = this.liconfig;
             return new Promise(function(resolve, reject) {
-                netw().then(function(data) {
-                    console.log(data);
-                    _.map(data.networks, function(device: IDevice) {
+                netw().then(function(networks) {
+
+                    _.map(networks, function(device: IDevice) {
                         if (device.type == "wifi") {
                             dev = device.interface;
                         }
