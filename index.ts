@@ -7,7 +7,7 @@ import Wpamanager = require("wpasupplicant-manager");
 import hostapdswitch = require("hostapd_switch");
 import testinternet = require("promise-test-connection");
 import merge = require("json-add");
-import LMC = require("linux-mobile-connection");
+import Wvdial = require("wvdialjs");
 
 let netw: netw = require("netw");
 let verb = require("verbo");
@@ -126,14 +126,10 @@ interface ClassOpt {
     wpasupplicant_path?: string;
 }
 interface IMobile {
-    provider?: IProvider;
-    options?: {
-        verbose?: boolean;
-        wvdialFile?: string;
-        dev?: any;
-        ifOffline?: boolean;
-        retry?: boolean;
-    };
+    provider: IProvider;
+    device?: any;
+    configFilePath?:string;
+    
 }
 interface ILiNetworkConf {
     port: number;
@@ -195,12 +191,29 @@ let config: ILiNetworkConf = {
 class LiNetwork {
     liconfig: ILiNetworkConf;
     hostapd: IHConf;
+    mobile;
     constructor(data: ClassOpt) {
 
         merge(config, data);
 
 
         this.liconfig = config;
+        
+        
+        if(config.mobile){
+            if(!config.mobile.configFilePath) config.mobile.configFilePath = "/etc/wvdial.conf"; 
+            let Wv=new Wvdial(config.mobile.configFilePath,config.mobile.device)
+            this.mobile=Wv
+            
+            
+            Wv.configure().then(function(){
+                
+            })
+
+            
+        }
+        
+        
     }
     mobileconnect() {
 
