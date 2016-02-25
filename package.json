@@ -1,6 +1,6 @@
 {
   "name": "linetwork",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "bluebird": "^3.1.1",
-    "hostapd_switch": "0.0.64",
+    "hostapd_switch": "0.0.65",
     "json-add": "0.0.7",
     "lodash": "^3.10.1",
     "mobile-providers": "^1.0.1",
