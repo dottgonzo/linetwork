@@ -1,6 +1,6 @@
 {
   "name": "linetwork",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -45,6 +45,7 @@
     "netw": "0.0.59",
     "promise-test-connection": "0.0.30",
     "promised-exec": "^1.0.1",
+    "timerdaemon": "0.0.4",
     "verbo": "0.0.9",
     "wpasupplicant-manager": "0.0.3",
     "wvdialjs": "0.0.90"
