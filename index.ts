@@ -8,7 +8,8 @@ import hostapdswitch = require("hostapd_switch");
 import testinternet = require("promise-test-connection");
 import merge = require("json-add");
 import Wvdial = require("wvdialjs");
-import timerdaemon = require("timerdaemon");
+
+
 
 
 let netw: netw = require("netw");
@@ -190,7 +191,8 @@ class LiNetwork {
     liconfig: ILiNetworkConf;
     hostapd: IHConf;
     mobile;
-    networking: Network[];
+
+    
     constructor(data: ClassOpt) {
 
         merge(config, data);
@@ -205,12 +207,7 @@ class LiNetwork {
             this.mobile = Wv
         }
 
-        let networking = this.networking;
-        timerdaemon.pre(60000, function() {
-            netw().then(function(n) {
-                networking = n
-            })
-        })
+        
 
 
 
