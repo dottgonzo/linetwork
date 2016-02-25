@@ -120,7 +120,7 @@ interface IDevice {
 
 interface ClassOpt {
     port: number;
-    recovery_interface?: string;
+    wifi_interface?: string;
     mobile?: IMobile;
     hostapd?: IHostapdcf;
     wpasupplicant_path?: string;
@@ -128,12 +128,11 @@ interface ClassOpt {
 interface IMobile {
     provider: IProvider;
     device?: any;
-    configFilePath?:string;
-    
+    configFilePath?: string;
+
 }
 interface ILiNetworkConf {
-    port: number;
-    recovery_interface: string;
+    wifi_interface: string;
     mobile?: IMobile;
     hostapd: IHostapd;
     wpasupplicant_path?: string;
@@ -176,14 +175,12 @@ interface IInit {
 }
 
 let config: ILiNetworkConf = {
-    port: 4000, // in modalità regular setta la porta per il manager
-    // wpa_supplicant_path:'/etc/wpa_supplicant/wpa_supplicant.conf',
     hostapd: {
         driver: "nl80211",
         ssid: "testttap",
         wpa_passphrase: "testpass"
     },
-    recovery_interface: "auto",
+    wifi_interface: "auto",
     wpasupplicant_path: "/etc/wpa_supplicant/wpa_supplicant.conf"
 };
 
@@ -198,38 +195,33 @@ class LiNetwork {
 
 
         this.liconfig = config;
-        
-        
-        if(config.mobile){
-            if(!config.mobile.configFilePath) config.mobile.configFilePath = "/etc/wvdial.conf"; 
-            let Wv=new Wvdial(config.mobile.configFilePath,config.mobile.device)
-            this.mobile=Wv
-            
-            
-            Wv.configure().then(function(){
-                
-            })
 
-            
+
+        if (config.mobile) {
+            if (!config.mobile.configFilePath) config.mobile.configFilePath = "/etc/wvdial.conf";
+            let Wv = new Wvdial(config.mobile)
+            this.mobile = Wv
         }
-        
-        
+
+
     }
     mobileconnect() {
-
+        let Wv = this.mobile;
         return new Promise<boolean>(function(resolve, reject) {
-            if (this.liconfig.mobile) {
+            Wv.configure().then(function() {
+                Wv.connect(true).then(function() {
 
-                LMC(this.liconfig.mobile.provider, this.liconfig.mobile.options).then(function(answer) {
-                    resolve(answer);
-                }).catch(function(err) {
-                    verb(err, "error", "J5 linuxmobile");
-                    reject(err);
+                    console.log("modem started")
+
+                }).catch(function() {
+                    console.log("modem error")
+
+
+
                 });
+            })
 
-            } else {
-                reject({ error: "no mobile configuration provided" });
-            }
+
 
 
         });
@@ -256,7 +248,7 @@ class LiNetwork {
 
     wifi_switch(mode: string, dev?: string) {
         console.log(mode, dev);
-        if (dev || this.liconfig.recovery_interface != "auto") {
+        if (dev || this.liconfig.wifi_interface != "auto") {
             if (dev) {
                 var apswitch = new hostapdswitch(
                     {
@@ -269,7 +261,7 @@ class LiNetwork {
             } else {
                 var apswitch = new hostapdswitch(
                     {
-                        interface: this.liconfig.recovery_interface,
+                        interface: this.liconfig.wifi_interface,
                         wpasupplicant_path: config.wpasupplicant_path,
                         hostapd: this.hostapd
                     }
@@ -365,76 +357,69 @@ class LiNetwork {
         }
     };
 
-    mproviders(): IGlobalProviders[] {
-        return JSON.parse(fs.readFileSync(__dirname + "/node_modules/linux-mobile-connection/node_modules/wvdialjs/providers.json", "utf-8"));
-    };
 
     connection(recovery?: boolean) {
         let config = this.liconfig;
+        let Wv = this.mobile;
         return new Promise<IInit>(function(resolve, reject) {
             verb(config, "debug", "Tryng to connect");
 
 
-            testinternet().then(function() {
-                resolve({ conection: true, recovery: false });
-            }).catch(function() {
 
+            getinterfa(config.wifi_interface).then(function(interf: IDevice) {
 
-                getinterfa(config.recovery_interface).then(function(interf: IDevice) {
+                let wifi_exist: string = interf.interface;
 
-                    let wifi_exist: string = interf.interface;
+                let confhapds = {
+                    interface: wifi_exist,
+                    wpasupplicant_path: config.wpasupplicant_path,
+                    hostapd: config.hostapd
+                };
 
-                    let confhapds = {
-                        interface: wifi_exist,
-                        wpasupplicant_path: config.wpasupplicant_path,
-                        hostapd: config.hostapd
-                    };
-
-                    verb(wifi_exist, "info", "Wlan interface founded");
-                    let apswitch = new hostapdswitch(confhapds, true);
-                    apswitch.client(true, true).then(function(answer) {
-                        resolve({ conection: true, recovery: false });
-                    }).catch(function(err) {
-                        if (config.mobile) {
-                            LMC(config.mobile.provider, config.mobile.options).then(function(answer) {
-                                resolve({ conection: true, recovery: false });
-                            }).catch(function() {
-                                if (recovery) {
-                                    recovery_mode(config, wifi_exist).then(function(answer) {
-                                        resolve({ conection: false, recovery: true });
-                                    }).catch(function(err) {
-                                        verb(err, "error", "J5 recovery mode start");
-                                        reject(err);
-                                    });
-                                } else {
-                                    reject("no wlan host available");
-                                }
-                            });
-                        } else if (recovery) {
-                            recovery_mode(config, wifi_exist).then(function(answer) {
-                                resolve({ conection: false, recovery: true });
-                            }).catch(function(err) {
-                                verb(err, "error", "J5 recovery mode start");
-                                reject(err);
-                            });
-                        }
-                    });
+                verb(wifi_exist, "info", "Wlan interface founded");
+                let apswitch = new hostapdswitch(confhapds, true);
+                apswitch.client(true, true).then(function(answer) {
+                    resolve({ conection: true, recovery: false });
                 }).catch(function(err) {
-
-                    verb("no wifi", "warn", "networker");
-
-                    if (config.mobile) {
-                        LMC(config.mobile.provider, config.mobile.options).then(function(answer) {
-                            resolve({ conection: true, recovery: false });
+                    if (recovery) {
+                        recovery_mode(config, wifi_exist).then(function(answer) {
+                            resolve({ conection: false, recovery: true });
                         }).catch(function(err) {
-                            verb(err, "error", "J5 linuxmobile");
+                            verb(err, "error", "J5 recovery mode start");
                             reject(err);
                         });
                     }
 
+                    if (config.mobile) {
+
+
+                    }
                 });
+            }).catch(function(err) {
+
+                verb("no wifi", "warn", "networker");
+
+                if (config.mobile) {
+                    Wv.configure().then(function() {
+                        Wv.connect(true).then(function() {
+
+                            console.log("modem started")
+
+                        }).catch(function() {
+                            console.log("modem error")
+
+
+
+                        });
+                    })
+
+
+                }
 
             });
+
+
+
 
         });
     };
@@ -443,7 +428,7 @@ class LiNetwork {
         let config = this.liconfig;
 
         return new Promise(function(resolve, reject) {
-            getinterfa(config.recovery_interface).then(function(interf: IDevice) {
+            getinterfa(config.wifi_interface).then(function(interf: IDevice) {
                 let wifi_exist: string = interf.interface;
                 recovery_mode(config, wifi_exist, mode).then(function(answer) {
                     resolve(answer);

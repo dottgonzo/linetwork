@@ -2,7 +2,7 @@ import linet=require('../index');
 let verb=require('verbo');
 let options={
   port:4000,
-  wpasupplicant_path:"dd",
+  wpasupplicant_path:"/etc/wpa_supplicant/wpa_supplicant.conf",
   hostapd:{
     driver:'rtl871xdrv',
     ssid:'testttap',
