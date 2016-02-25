@@ -119,7 +119,6 @@ interface IDevice {
 }
 
 interface ClassOpt {
-    port: number;
     wifi_interface?: string;
     mobile?: IMobile;
     hostapd?: IHostapdcf;
