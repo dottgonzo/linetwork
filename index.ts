@@ -242,8 +242,8 @@ class LiNetwork {
     }
 
     wpamanager() {
-
-        return new Wpamanager(this.liconfig.wpasupplicant_path);
+let path=this.liconfig.wpasupplicant_path;
+        return new Wpamanager(path);
 
     }
 
