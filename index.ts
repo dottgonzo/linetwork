@@ -192,7 +192,7 @@ class LiNetwork {
     hostapd: IHConf;
     mobile;
 
-    
+
     constructor(data: ClassOpt) {
 
         merge(config, data);
@@ -207,7 +207,7 @@ class LiNetwork {
             this.mobile = Wv
         }
 
-        
+
 
 
 
@@ -242,7 +242,7 @@ class LiNetwork {
     }
 
     wpamanager() {
-let path=this.liconfig.wpasupplicant_path;
+        let path = this.liconfig.wpasupplicant_path;
         return new Wpamanager(path);
 
     }
@@ -399,6 +399,22 @@ let path=this.liconfig.wpasupplicant_path;
                     }
 
                     if (config.mobile) {
+
+
+
+                        Wv.configure().then(function() {
+                            Wv.connect(true).then(function() {
+                                resolve({ conection: true, recovery: false });
+                                console.log("modem started")
+
+                            }).catch(function() {
+                                console.log("modem error")
+
+
+
+                            });
+                        })
+
 
 
                     }
