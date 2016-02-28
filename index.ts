@@ -1,7 +1,7 @@
 import * as Promise from "bluebird";
 import * as fs from "fs";
 import * as _ from "lodash";
-
+let hwrestart = require("hwrestart");
 import Providers = require("mobile-providers");
 import Wpamanager = require("wpasupplicant-manager");
 import hostapdswitch = require("hostapd_switch");
@@ -213,17 +213,17 @@ class LiNetwork {
 
 
     }
-    mobileconnect() {
+    mobileconnect(bool) {
         let Wv = this.mobile;
         return new Promise<boolean>(function(resolve, reject) {
-            Wv.configure().then(function() {
+            Wv.configure(bool).then(function() {
                 Wv.connect(true).then(function() {
 
-                    console.log("modem started")
+                    console.log("modem started");
 
-                }).catch(function() {
-                    console.log("modem error")
-
+                }).catch(function(err) {
+                    console.log("modem error");
+                    reject(err);
 
 
                 });
@@ -403,14 +403,15 @@ class LiNetwork {
 
 
                         Wv.configure().then(function() {
+                            console.log("modem started")
                             Wv.connect(true).then(function() {
-                                resolve({ conection: true, recovery: false });
-                                console.log("modem started")
+                                hwrestart("unplug")
+
 
                             }).catch(function() {
                                 console.log("modem error")
 
-
+                                hwrestart("unplug")
 
                             });
                         })
@@ -425,16 +426,16 @@ class LiNetwork {
 
                 if (config.mobile) {
                     Wv.configure().then(function() {
-                        Wv.connect(true).then(function() {
-
-                            console.log("modem started")
-
-                        }).catch(function() {
-                            console.log("modem error")
+                            Wv.connect(true).then(function() {
+                                hwrestart("unplug")
 
 
+                            }).catch(function() {
+                                console.log("modem error")
 
-                        });
+                                hwrestart("unplug")
+
+                            });
                     })
 
 
