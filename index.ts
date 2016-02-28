@@ -193,17 +193,17 @@ class LiNetwork {
     mobile;
 
 
-    constructor(data: ClassOpt) {
+    constructor(data) {
 
-        merge(config, data);
-
-
-        this.liconfig = config;
+        merge(data, config);
 
 
-        if (config.mobile) {
-            if (!config.mobile.configFilePath) config.mobile.configFilePath = "/etc/wvdial.conf";
-            let Wv = new Wvdial(config.mobile)
+        this.liconfig = data;
+
+
+        if (data.mobile) {
+            if (!data.mobile.configFilePath) data.mobile.configFilePath = "/etc/wvdial.conf";
+            let Wv = new Wvdial(data.mobile)
             this.mobile = Wv
         }
 
@@ -404,7 +404,8 @@ class LiNetwork {
 
                         Wv.configure().then(function() {
                             console.log("modem started")
-                            Wv.connect(true).then(function() {
+                            Wv.connect(true).then(function(a) {
+                                
                                 hwrestart("unplug")
 
 
@@ -426,17 +427,25 @@ class LiNetwork {
 
                 if (config.mobile) {
                     Wv.configure().then(function() {
-                            Wv.connect(true).then(function() {
-                                hwrestart("unplug")
+                        Wv.connect(true).then(function(a) {
+                            console.log(a)
+                            hwrestart("unplug")
 
 
-                            }).catch(function() {
-                                console.log("modem error")
+                        }).catch(function(e) {
+                            console.log(e)
+                            console.log("modem error")
 
-                                hwrestart("unplug")
+                            hwrestart("unplug")
 
-                            });
-                    })
+                        });
+                    }).catch(function(e) {
+                        console.log(e)
+                        console.log("modem error")
+
+                        hwrestart("unplug")
+
+                    });
 
 
                 }
