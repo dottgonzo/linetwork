@@ -395,13 +395,8 @@ class LiNetwork {
 
 
                     if (config.mobile) {
-                        if (recovery) {
-                            recovery_mode(config, wifi_exist).then(function(answer) {
-                                resolve({ conection: false, recovery: true });
-                            }).catch(function(err) {
-                                verb(err, "error", "J5 recovery mode start");
-                                reject(err);
-                            });
+                        if (recovery &&wifi_exist) {
+                            recovery_mode(config, wifi_exist)
                         }
 
                         Wv.configure().then(function() {
@@ -418,7 +413,13 @@ class LiNetwork {
                                 hwrestart("unplug")
 
                             });
-                        })
+                        }).catch(function(e) {
+                            console.log(e)
+                            console.log("modem error")
+
+                            hwrestart("unplug")
+
+                        });
 
 
 
