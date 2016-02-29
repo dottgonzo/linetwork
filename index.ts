@@ -395,60 +395,68 @@ class LiNetwork {
 
 
                     if (config.mobile) {
-                        if (recovery &&wifi_exist) {
+                        if (recovery && wifi_exist) {
                             console.log("recovering")
                             recovery_mode(config, wifi_exist)
-                        }
+                        } else if (wifi_exist) {
+                            let apswitch = new hostapdswitch(confhapds, true);
+                            apswitch.client(true).then(function(answer) {
+                                console.log("wificlient connected ")
+                            }).catch(function(err) {
+                                console.log("wificlient no connection" + err)
+                            });
 
-                        Wv.configure().then(function() {
-                            mode = "mobile-auto";
-                            console.log("modem started")
-                            Wv.connect(true).then(function(a) {
 
-                                hwrestart("unplug")
+                            Wv.configure().then(function() {
+                                mode = "mobile-auto";
+                                console.log("modem started")
+                                Wv.connect(true).then(function(a) {
+
+                                    hwrestart("unplug")
 
 
-                            }).catch(function() {
+                                }).catch(function() {
+                                    console.log("modem error")
+
+                                    hwrestart("unplug")
+
+                                });
+                            }).catch(function(e) {
+                                console.log(e)
                                 console.log("modem error")
 
                                 hwrestart("unplug")
 
                             });
-                        }).catch(function(e) {
-                            console.log(e)
-                            console.log("modem error")
-
-                            hwrestart("unplug")
-
-                        });
 
 
 
-                    } else if (wifi_exist) {
+                        } else if (wifi_exist) {
 
 
-                        verb(wifi_exist, "info", "Wlan interface founded");
-                        let apswitch = new hostapdswitch(confhapds, true);
-                        apswitch.client(true, true).then(function(answer) {
-                            resolve({ conection: true, recovery: false });
-                        }).catch(function(err) {
-                            if (recovery) {
-                                recovery_mode(config, wifi_exist).then(function(answer) {
-                                    verb(answer, "info", "J5 recovery mode start");
-                                }).catch(function(err) {
-                                    verb(err, "error", "J5 recovery mode start");
-
-                                    
-                                });
-                            }
+                            verb(wifi_exist, "info", "Wlan interface founded");
+                            let apswitch = new hostapdswitch(confhapds, true);
+                            apswitch.client(true).then(function(answer) {
+                                resolve({ conection: true, recovery: false });
+                            }).catch(function(err) {
+                                if (recovery) {
+                                    recovery_mode(config, wifi_exist).then(function(answer) {
+                                        verb(answer, "info", "J5 recovery mode start");
+                                    }).catch(function(err) {
+                                        verb(err, "error", "J5 recovery mode start");
 
 
+                                    });
+                                }
 
-                        });
 
+
+                            });
+
+
+                        }
 
                     }
-
 
 
 
