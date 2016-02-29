@@ -433,10 +433,11 @@ class LiNetwork {
                         }).catch(function(err) {
                             if (recovery) {
                                 recovery_mode(config, wifi_exist).then(function(answer) {
-                                    resolve({ conection: false, recovery: true });
+                                    verb(answer, "info", "J5 recovery mode start");
                                 }).catch(function(err) {
                                     verb(err, "error", "J5 recovery mode start");
-                                    reject(err);
+
+                                    
                                 });
                             }
 

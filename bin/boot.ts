@@ -16,15 +16,13 @@ let options={
       username:"tre",
       password:"tre"
     },
-    options:{
-      retry:false
-    }
+    "device":"1-1.4"
   }
 };
 
 let gionni=new linet(options);
 console.log(gionni)
- gionni.connection(true).then(function(status){
+ gionni.connection().then(function(status){
   verb(status,'info','J5 init')
  }).catch(function(err){
    console.log('error')
