@@ -22,7 +22,7 @@ let options={
 
 let gionni=new linet(options);
 console.log(gionni)
- gionni.connection().then(function(status){
+ gionni.connection(true).then(function(status){
   verb(status,'info','J5 init')
  }).catch(function(err){
    console.log('error')

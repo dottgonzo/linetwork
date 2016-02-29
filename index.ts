@@ -396,6 +396,7 @@ class LiNetwork {
 
                     if (config.mobile) {
                         if (recovery &&wifi_exist) {
+                            console.log("recovering")
                             recovery_mode(config, wifi_exist)
                         }
 
