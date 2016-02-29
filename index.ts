@@ -191,6 +191,7 @@ class LiNetwork {
     liconfig: ILiNetworkConf;
     hostapd: IHConf;
     mobile;
+    mode: string;
 
 
     constructor(data) {
@@ -367,71 +368,87 @@ class LiNetwork {
 
 
     connection(recovery?: boolean) {
+        let mode = this.mode;
         let config = this.liconfig;
         let Wv = this.mobile;
         return new Promise<IInit>(function(resolve, reject) {
             verb(config, "debug", "Tryng to connect");
 
+            if (mode == "mobile-auto") {
+                reject("auto mode")
+                console.log("wv running, nothing to do")
+            } else {
 
 
-            getinterfa(config.wifi_interface).then(function(interf: IDevice) {
+                getinterfa(config.wifi_interface).then(function(interf: IDevice) {
 
-                let wifi_exist: string = interf.interface;
+                    let wifi_exist: string = interf.interface;
 
-                let confhapds = {
-                    interface: wifi_exist,
-                    wpasupplicant_path: config.wpasupplicant_path,
-                    hostapd: config.hostapd
-                };
+                    let confhapds = {
+                        interface: wifi_exist,
+                        wpasupplicant_path: config.wpasupplicant_path,
+                        hostapd: config.hostapd
+                    };
 
-                verb(wifi_exist, "info", "Wlan interface founded");
-                let apswitch = new hostapdswitch(confhapds, true);
-                apswitch.client(true, true).then(function(answer) {
-                    resolve({ conection: true, recovery: false });
+                    verb(wifi_exist, "info", "Wlan interface founded");
+                    let apswitch = new hostapdswitch(confhapds, true);
+                    apswitch.client(true, true).then(function(answer) {
+                        resolve({ conection: true, recovery: false });
+                    }).catch(function(err) {
+                        if (recovery) {
+                            recovery_mode(config, wifi_exist).then(function(answer) {
+                                resolve({ conection: false, recovery: true });
+                            }).catch(function(err) {
+                                verb(err, "error", "J5 recovery mode start");
+                                reject(err);
+                            });
+                        }
+
+                        if (config.mobile) {
+
+
+                            Wv.configure().then(function() {
+                                mode = "mobile-auto";
+                                console.log("modem started")
+                                Wv.connect(true).then(function(a) {
+
+                                    hwrestart("unplug")
+
+
+                                }).catch(function() {
+                                    console.log("modem error")
+
+                                    hwrestart("unplug")
+
+                                });
+                            })
+
+
+
+                        }
+                    });
                 }).catch(function(err) {
-                    if (recovery) {
-                        recovery_mode(config, wifi_exist).then(function(answer) {
-                            resolve({ conection: false, recovery: true });
-                        }).catch(function(err) {
-                            verb(err, "error", "J5 recovery mode start");
-                            reject(err);
-                        });
-                    }
+
+                    verb("no wifi", "warn", "networker");
 
                     if (config.mobile) {
 
 
 
                         Wv.configure().then(function() {
-                            console.log("modem started")
+                            mode = "mobile-auto";
                             Wv.connect(true).then(function(a) {
-                                
+                                console.log(a)
                                 hwrestart("unplug")
 
 
-                            }).catch(function() {
+                            }).catch(function(e) {
+                                console.log(e)
                                 console.log("modem error")
 
                                 hwrestart("unplug")
 
                             });
-                        })
-
-
-
-                    }
-                });
-            }).catch(function(err) {
-
-                verb("no wifi", "warn", "networker");
-
-                if (config.mobile) {
-                    Wv.configure().then(function() {
-                        Wv.connect(true).then(function(a) {
-                            console.log(a)
-                            hwrestart("unplug")
-
-
                         }).catch(function(e) {
                             console.log(e)
                             console.log("modem error")
@@ -439,20 +456,18 @@ class LiNetwork {
                             hwrestart("unplug")
 
                         });
-                    }).catch(function(e) {
-                        console.log(e)
-                        console.log("modem error")
-
-                        hwrestart("unplug")
-
-                    });
 
 
-                }
-
-            });
 
 
+
+
+
+                    }
+
+                });
+
+            }
 
 
         });
