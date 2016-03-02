@@ -196,15 +196,15 @@ class LiNetwork {
 
     constructor(data) {
 
-        merge(data, config);
+        merge(config, data);
 
 
-        this.liconfig = data;
+        this.liconfig = config;
 
 
-        if (data.mobile) {
-            if (!data.mobile.configFilePath) data.mobile.configFilePath = "/etc/wvdial.conf";
-            let Wv = new Wvdial(data.mobile)
+        if (this.liconfig.mobile) {
+            if (!this.liconfig.mobile.configFilePath) this.liconfig.mobile.configFilePath = "/etc/wvdial.conf";
+            let Wv = new Wvdial(this.liconfig.mobile)
             this.mobile = Wv
         }
 
