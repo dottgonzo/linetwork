@@ -431,30 +431,31 @@ class LiNetwork {
 
 
 
-                        } else if (wifi_exist) {
-
-
-                            verb(wifi_exist, "info", "Wlan interface founded");
-                            let apswitch = new hostapdswitch(confhapds, true);
-                            apswitch.client(true).then(function(answer) {
-                                resolve({ conection: true, recovery: false });
-                            }).catch(function(err) {
-                                if (recovery) {
-                                    recovery_mode(config, wifi_exist).then(function(answer) {
-                                        verb(answer, "info", "J5 recovery mode start");
-                                    }).catch(function(err) {
-                                        verb(err, "error", "J5 recovery mode start");
-
-
-                                    });
-                                }
-
-
-
-                            });
-
-
                         }
+                    } else if (wifi_exist) {
+
+
+                        verb(wifi_exist, "info", "Wlan interface founded");
+                        let apswitch = new hostapdswitch(confhapds, true);
+                        apswitch.client(true).then(function(answer) {
+                            resolve({ conection: true, recovery: false });
+                        }).catch(function(err) {
+                            if (recovery) {
+                                recovery_mode(config, wifi_exist).then(function(answer) {
+                                    verb(answer, "info", "J5 recovery mode start");
+                                }).catch(function(err) {
+                                    verb(err, "error", "J5 recovery mode start");
+
+
+                                });
+                            }
+
+
+
+                        });
+
+
+
 
                     }
 
