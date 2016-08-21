@@ -493,6 +493,7 @@ class LiNetwork {
 
 
                     } else {
+                        console.log("no wifi!!???")
                         hwrestart("unplug")
                     }
 
