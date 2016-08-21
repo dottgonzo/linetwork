@@ -58,12 +58,12 @@ interface IGlobalProviders {
 
 function getinterfa(setted?: string) {
 
-    return new Promise<IDevice>(function(resolve, reject) {
+    return new Promise<IDevice>(function (resolve, reject) {
         let wifi_exist: any = false;
         let devi: IDevice;
-        netw().then(function(networks) {
+        netw().then(function (networks) {
 
-            _.map(networks, function(device: IDevice) {
+            _.map(networks, function (device: IDevice) {
 
                 if (device.type == "wifi" && (!setted || setted == "auto" || setted == device.interface)) {
                     wifi_exist = device.interface;
@@ -77,7 +77,7 @@ function getinterfa(setted?: string) {
                 reject({ error: "device not founded" });
             }
 
-        }).catch(function(err) {
+        }).catch(function (err) {
             reject(err);
         });
 
@@ -104,11 +104,11 @@ function recovery_mode(config: ILiNetworkConf, dev: string, mode?: string) {
 
     let apswitch = new hostapdswitch(confhapds);
 
-    return new Promise<boolean>(function(resolve, reject) {
-        apswitch[m]().then(function(answer) {
+    return new Promise<boolean>(function (resolve, reject) {
+        apswitch[m]().then(function (answer) {
             verb(answer, "warn", "linetwork recovery mode");
             resolve(true);
-        }).catch(function(err) {
+        }).catch(function (err) {
             verb(err, "error", "linetwork recovery mode failed");
             reject(err);
         });
@@ -216,13 +216,13 @@ class LiNetwork {
     }
     mobileconnect(bool) {
         let Wv = this.mobile;
-        return new Promise<boolean>(function(resolve, reject) {
-            Wv.configure(bool).then(function() {
-                Wv.connect(true).then(function() {
+        return new Promise<boolean>(function (resolve, reject) {
+            Wv.configure(bool).then(function () {
+                Wv.connect(true).then(function () {
 
                     console.log("modem started");
 
-                }).catch(function(err) {
+                }).catch(function (err) {
                     console.log("modem error");
                     reject(err);
 
@@ -277,28 +277,28 @@ class LiNetwork {
                 );
             }
             console.log("dev mode");
-            return new Promise<boolean>(function(resolve, reject) {
+            return new Promise<boolean>(function (resolve, reject) {
                 switch (mode) {
                     case "ap":
-                        apswitch.ap().then(function(answer) {
+                        apswitch.ap().then(function (answer) {
                             resolve(true);
-                        }).catch(function(err) {
+                        }).catch(function (err) {
                             reject(err);
                         });
                         break;
 
                     case "host":
-                        apswitch.host().then(function(answer) {
+                        apswitch.host().then(function (answer) {
                             resolve(true);
-                        }).catch(function(err) {
+                        }).catch(function (err) {
                             reject(err);
                         });
                         break;
 
                     case "client":
-                        apswitch.client().then(function(answer) {
+                        apswitch.client().then(function (answer) {
                             resolve(true);
-                        }).catch(function(err) {
+                        }).catch(function (err) {
                             reject(err);
                         });
                         break;
@@ -310,10 +310,10 @@ class LiNetwork {
         } else {
             console.log("auto mode");
             var config = this.liconfig;
-            return new Promise(function(resolve, reject) {
-                netw().then(function(networks) {
+            return new Promise(function (resolve, reject) {
+                netw().then(function (networks) {
 
-                    _.map(networks, function(device: IDevice) {
+                    _.map(networks, function (device: IDevice) {
                         if (device.type == "wifi") {
                             dev = device.interface;
                         }
@@ -332,25 +332,25 @@ class LiNetwork {
 
                         switch (mode) {
                             case "ap":
-                                apswitch.ap().then(function(answer) {
+                                apswitch.ap().then(function (answer) {
                                     resolve(true);
-                                }).catch(function(err) {
+                                }).catch(function (err) {
                                     reject(err);
                                 });
                                 break;
 
                             case "host":
-                                apswitch.host().then(function(answer) {
+                                apswitch.host().then(function (answer) {
                                     resolve(true);
-                                }).catch(function(err) {
+                                }).catch(function (err) {
                                     reject(err);
                                 });
                                 break;
 
                             case "client":
-                                apswitch.client().then(function(answer) {
+                                apswitch.client().then(function (answer) {
                                     resolve(true);
-                                }).catch(function(err) {
+                                }).catch(function (err) {
                                     reject(err);
                                 });
                                 break;
@@ -359,7 +359,7 @@ class LiNetwork {
                     } else {
                         reject({ error: "no dev" });
                     }
-                }).catch(function(err) {
+                }).catch(function (err) {
                     reject(err);
                 });
             });
@@ -371,10 +371,10 @@ class LiNetwork {
         let mode = this.mode;
         let config = this.liconfig;
         let Wv = this.mobile;
-        return new Promise<IInit>(function(resolve, reject) {
+        return new Promise<IInit>(function (resolve, reject) {
             verb(config, "debug", "Tryng to connect");
 
-            if (mode == "mobile-auto") {
+            if (mode === "mobile-auto") {
                 reject("auto mode")
                 console.log("wv running, nothing to do")
             } else {
@@ -382,7 +382,7 @@ class LiNetwork {
 
 
 
-                getinterfa(config.wifi_interface).then(function(interf: IDevice) {
+                getinterfa(config.wifi_interface).then(function (interf: IDevice) {
 
                     let wifi_exist: string = interf.interface;
 
@@ -400,28 +400,28 @@ class LiNetwork {
                             recovery_mode(config, wifi_exist)
                         } else if (wifi_exist) {
                             let apswitch = new hostapdswitch(confhapds, true);
-                            apswitch.client(true).then(function(answer) {
+                            apswitch.client(true).then(function (answer) {
                                 console.log("wificlient connected ")
-                            }).catch(function(err) {
+                            }).catch(function (err) {
                                 console.log("wificlient no connection" + err)
                             });
 
 
-                            Wv.configure().then(function() {
+                            Wv.configure().then(function () {
                                 mode = "mobile-auto";
                                 console.log("modem started")
-                                Wv.connect(true).then(function(a) {
+                                Wv.connect(true).then(function (a) {
 
                                     hwrestart("unplug")
 
 
-                                }).catch(function() {
+                                }).catch(function () {
                                     console.log("modem error")
 
                                     hwrestart("unplug")
 
                                 });
-                            }).catch(function(e) {
+                            }).catch(function (e) {
                                 console.log(e)
                                 console.log("modem error")
 
@@ -437,13 +437,13 @@ class LiNetwork {
 
                         verb(wifi_exist, "info", "Wlan interface founded");
                         let apswitch = new hostapdswitch(confhapds, true);
-                        apswitch.client(true).then(function(answer) {
+                        apswitch.client(true).then(function (answer) {
                             resolve({ conection: true, recovery: false });
-                        }).catch(function(err) {
+                        }).catch(function (err) {
                             if (recovery) {
-                                recovery_mode(config, wifi_exist).then(function(answer) {
+                                recovery_mode(config, wifi_exist).then(function (answer) {
                                     verb(answer, "info", "J5 recovery mode start");
-                                }).catch(function(err) {
+                                }).catch(function (err) {
                                     verb(err, "error", "J5 recovery mode start");
 
 
@@ -461,7 +461,7 @@ class LiNetwork {
 
 
 
-                }).catch(function(err) {
+                }).catch(function (err) {
 
                     verb("no wifi", "warn", "networker");
 
@@ -469,21 +469,21 @@ class LiNetwork {
 
 
 
-                        Wv.configure().then(function() {
+                        Wv.configure().then(function () {
                             mode = "mobile-auto";
-                            Wv.connect(true).then(function(a) {
+                            Wv.connect(true).then(function (a) {
                                 console.log(a)
                                 hwrestart("unplug")
 
 
-                            }).catch(function(e) {
+                            }).catch(function (e) {
                                 console.log(e)
                                 console.log("modem error")
 
                                 hwrestart("unplug")
 
                             });
-                        }).catch(function(e) {
+                        }).catch(function (e) {
                             console.log(e)
                             console.log("modem error")
 
@@ -492,14 +492,8 @@ class LiNetwork {
                         });
 
 
-
-
-
-
-
                     } else {
-                        console.log(err)
-                        throw Error("OOOH")
+                        hwrestart("unplug")
                     }
 
                 });
@@ -513,15 +507,15 @@ class LiNetwork {
     recovery(mode?: string) {
         let config = this.liconfig;
 
-        return new Promise(function(resolve, reject) {
-            getinterfa(config.wifi_interface).then(function(interf: IDevice) {
+        return new Promise(function (resolve, reject) {
+            getinterfa(config.wifi_interface).then(function (interf: IDevice) {
                 let wifi_exist: string = interf.interface;
-                recovery_mode(config, wifi_exist, mode).then(function(answer) {
+                recovery_mode(config, wifi_exist, mode).then(function (answer) {
                     resolve(answer);
-                }).catch(function(err) {
+                }).catch(function (err) {
                     reject(err);
                 });
-            }).catch(function(err) {
+            }).catch(function (err) {
                 reject(err);
             });
         });
