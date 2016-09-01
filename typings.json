@@ -1,0 +1,14 @@
+{
+  "globalDevDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20160601211834",
+    "deep-diff": "registry:dt/deep-diff#0.0.0+20160317120654",
+    "mocha": "registry:dt/mocha#2.2.5+20160720003353",
+    "node": "registry:dt/node#6.0.0+20160831021119",
+    "path-exists": "registry:dt/path-exists#1.0.0+20160316155526"
+  },
+  "globalDependencies": {
+    "async": "registry:dt/async#2.0.1+20160804113311",
+    "bluebird": "registry:dt/bluebird#3.0.0+20160811111256",
+    "lodash": "registry:dt/lodash#4.14.0+20160830145422"
+  }
+}

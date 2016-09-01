@@ -1,4 +1,4 @@
-import linet=require('../index');
+import linet from '../index';
 let verb=require('verbo');
 let options={
   port:4000,

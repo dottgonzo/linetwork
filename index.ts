@@ -4,7 +4,7 @@ import * as _ from "lodash";
 let hwrestart = require("hwrestart");
 import Providers = require("mobile-providers");
 import Wpamanager = require("wpasupplicant-manager");
-import hostapdswitch = require("hostapd_switch");
+import hostapdswitch from "hostapd_switch";
 import testinternet = require("promise-test-connection");
 import merge = require("json-add");
 import Wvdial = require("wvdialjs");
@@ -187,7 +187,7 @@ let config: ILiNetworkConf = {
 };
 
 
-class LiNetwork {
+export default class LiNetwork {
     liconfig: ILiNetworkConf;
     hostapd: IHConf;
     mobile;
@@ -528,4 +528,4 @@ class LiNetwork {
 
 
 
-export = LiNetwork;
+
