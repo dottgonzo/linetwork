@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as _ from "lodash";
 let hwrestart = require("hwrestart");
 import Providers = require("mobile-providers");
-import Wpamanager = require("wpasupplicant-manager");
+import Wpamanager from "wpasupplicant-manager";
 import hostapdswitch from "hostapd_switch";
 import testinternet = require("promise-test-connection");
 import merge = require("json-add");
