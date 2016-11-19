@@ -1,6 +1,6 @@
 {
   "name": "linetwork",
-  "version": "0.0.62",
+  "version": "0.0.63",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "bluebird": "^3.1.1",
-    "hostapd_switch": "0.0.95",
+    "hostapd_switch": "0.0.96",
     "hwrestart": "0.0.12",
     "json-add": "0.0.7",
     "lodash": "^3.10.1",
@@ -47,7 +47,7 @@
     "promise-test-connection": "0.0.30",
     "promised-exec": "^1.0.1",
     "verbo": "0.0.9",
-    "wpasupplicant-manager": "0.0.6",
+    "wpasupplicant-manager": "0.0.7",
     "wvdialjs": "0.0.92"
   }
 }
