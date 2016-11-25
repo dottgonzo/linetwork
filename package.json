@@ -1,6 +1,6 @@
 {
   "name": "linetwork",
-  "version": "0.0.63",
+  "version": "0.0.64",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -23,31 +23,32 @@
     "url": "https://github.com/dottgonzo/linetwork/issues"
   },
   "devDependencies": {
-    "chai": "^3.4.1",
-    "gulp": "^3.9.0",
-    "gulp-bump": "^1.0.0",
-    "gulp-concat": "^2.6.0",
-    "gulp-filter": "^3.0.1",
-    "gulp-git": "^1.6.1",
-    "gulp-mocha": "^2.2.0",
-    "gulp-prompt": "^0.1.2",
-    "gulp-sourcemaps": "^1.6.0",
+    "chai": "^3.5.0",
+    "gulp": "^3.9.1",
+    "gulp-bump": "^2.5.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-filter": "^4.0.0",
+    "gulp-mocha": "^3.0.1",
+    "gulp-prompt": "^0.2.0",
+    "gulp-sourcemaps": "^1.9.1",
     "gulp-tag-version": "^1.3.0",
-    "gulp-typescript": "^2.10.0",
-    "mocha": "^2.3.4"
+    "gulp-typescript": "^3.1.3",
+    "gulp-util": "^3.0.7",
+    "mocha": "^3.2.0",
+    "typescript": "^2.0.10"
   },
   "dependencies": {
     "bluebird": "^3.1.1",
-    "hostapd_switch": "0.0.96",
-    "hwrestart": "0.0.12",
-    "json-add": "0.0.7",
+    "hostapd_switch": "^0.0.97",
+    "hwrestart": "^0.0.12",
+    "json-add": "^0.1.0",
     "lodash": "^3.10.1",
     "mobile-providers": "^1.0.1",
-    "netw": "0.0.59",
+    "netw": "^0.0.65",
     "promise-test-connection": "0.0.30",
     "promised-exec": "^1.0.1",
     "verbo": "0.0.9",
-    "wpasupplicant-manager": "0.0.7",
-    "wvdialjs": "0.0.92"
+    "wpasupplicant-manager": "^0.0.8",
+    "wvdialjs": "0.0.93"
   }
 }

@@ -1,19 +1,17 @@
 import * as Promise from "bluebird";
 import * as fs from "fs";
 import * as _ from "lodash";
-let hwrestart = require("hwrestart");
 import Providers = require("mobile-providers");
 import Wpamanager from "wpasupplicant-manager";
 import hostapdswitch from "hostapd_switch";
 import testinternet = require("promise-test-connection");
-import merge = require("json-add");
-import Wvdial = require("wvdialjs");
+import merge from "json-add";
+import Wvdial from "wvdialjs";
 
 
-
-
-let netw: netw = require("netw");
-let verb = require("verbo");
+import netw from "netw";
+const verb = require("verbo");
+const hwrestart = require("hwrestart");
 
 
 interface netw {
@@ -65,7 +63,7 @@ function getinterfa(setted?: string) {
 
             _.map(networks, function (device: IDevice) {
 
-                if (device.type == "wifi" && (!setted || setted == "auto" || setted == device.interface)) {
+                if (device.type === "wifi" && (!setted || setted === "auto" || setted === device.interface)) {
                     wifi_exist = device.interface;
                     devi = device;
                 }
@@ -257,7 +255,7 @@ export default class LiNetwork {
 
     wifi_switch(mode: string, dev?: string) {
         console.log(mode, dev);
-        if (dev || this.liconfig.wifi_interface != "auto") {
+        if (dev || this.liconfig.wifi_interface !== "auto") {
             if (dev) {
                 var apswitch = new hostapdswitch(
                     {
@@ -314,7 +312,7 @@ export default class LiNetwork {
                 netw().then(function (networks) {
 
                     _.map(networks, function (device: IDevice) {
-                        if (device.type == "wifi") {
+                        if (device.type === "wifi") {
                             dev = device.interface;
                         }
                     });
