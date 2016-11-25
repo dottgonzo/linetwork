@@ -94,13 +94,14 @@ function recovery_mode(config: ILiNetworkConf, dev: string, mode?: string) {
         m = "host";
     }
 
-    let confhapds = {
+ 
+ 
+
+    const apswitch = new hostapdswitch({
         interface: dev,
         wpasupplicant_path: config.wpasupplicant_path,
         hostapd: config.hostapd
-    };
-
-    let apswitch = new hostapdswitch(confhapds);
+    });
 
     return new Promise<boolean>(function (resolve, reject) {
         apswitch[m]().then(function (answer) {
@@ -174,7 +175,7 @@ interface IInit {
     details?: IConnection;
 }
 
-let config: ILiNetworkConf = {
+const config: ILiNetworkConf = {
     hostapd: {
         driver: "nl80211",
         ssid: "testttap",
@@ -202,18 +203,16 @@ export default class LiNetwork {
 
         if (this.liconfig.mobile) {
             if (!this.liconfig.mobile.configFilePath) this.liconfig.mobile.configFilePath = "/etc/wvdial.conf";
-            let Wv = new Wvdial(this.liconfig.mobile)
-            this.mobile = Wv
+
+            this.mobile = new Wvdial(this.liconfig.mobile)
         }
 
 
-
-
-
-
     }
+
+
     mobileconnect(bool) {
-        let Wv = this.mobile;
+        const Wv = this.mobile;
         return new Promise<boolean>(function (resolve, reject) {
             Wv.configure(bool).then(function () {
                 Wv.connect(true).then(function () {
@@ -241,9 +240,8 @@ export default class LiNetwork {
     }
 
     wpamanager() {
-        let path = this.liconfig.wpasupplicant_path;
-        return new Wpamanager(path);
-
+        const path = this.liconfig.wpasupplicant_path;
+        return new Wpamanager(this.liconfig.wpasupplicant_path);
     }
 
 
@@ -256,8 +254,9 @@ export default class LiNetwork {
     wifi_switch(mode: string, dev?: string) {
         console.log(mode, dev);
         if (dev || this.liconfig.wifi_interface !== "auto") {
+            let apswitch:hostapdswitch
             if (dev) {
-                var apswitch = new hostapdswitch(
+                apswitch = new hostapdswitch(
                     {
                         interface: dev,
                         wpasupplicant_path: config.wpasupplicant_path,
@@ -266,7 +265,7 @@ export default class LiNetwork {
                     }
                 );
             } else {
-                var apswitch = new hostapdswitch(
+                apswitch = new hostapdswitch(
                     {
                         interface: this.liconfig.wifi_interface,
                         wpasupplicant_path: config.wpasupplicant_path,
@@ -307,7 +306,7 @@ export default class LiNetwork {
 
         } else {
             console.log("auto mode");
-            var config = this.liconfig;
+            const config = this.liconfig;
             return new Promise(function (resolve, reject) {
                 netw().then(function (networks) {
 
@@ -318,7 +317,7 @@ export default class LiNetwork {
                     });
                     if (dev) {
 
-                        var apswitch = new hostapdswitch(
+                        const apswitch = new hostapdswitch(
                             {
                                 interface: dev,
                                 hostapd: config.hostapd,
@@ -382,9 +381,9 @@ export default class LiNetwork {
 
                 getinterfa(config.wifi_interface).then(function (interf: IDevice) {
 
-                    let wifi_exist: string = interf.interface;
+                    const wifi_exist: string = interf.interface;
 
-                    let confhapds = {
+                    const confhapds = {
                         interface: wifi_exist,
                         wpasupplicant_path: config.wpasupplicant_path,
                         hostapd: config.hostapd
@@ -397,7 +396,11 @@ export default class LiNetwork {
                             console.log("recovering")
                             recovery_mode(config, wifi_exist)
                         } else if (wifi_exist) {
-                            let apswitch = new hostapdswitch(confhapds, true);
+                            let apswitch = new hostapdswitch({
+                        interface: wifi_exist,
+                        wpasupplicant_path: config.wpasupplicant_path,
+                        hostapd: config.hostapd
+                    }, true);
                             apswitch.client(true).then(function (answer) {
                                 console.log("wificlient connected ")
                             }).catch(function (err) {
@@ -434,7 +437,7 @@ export default class LiNetwork {
 
 
                         verb(wifi_exist, "info", "Wlan interface founded");
-                        let apswitch = new hostapdswitch(confhapds, true);
+                        const apswitch = new hostapdswitch(confhapds, true);
                         apswitch.client(true).then(function (answer) {
                             resolve({ conection: true, recovery: false });
                         }).catch(function (err) {
@@ -447,14 +450,7 @@ export default class LiNetwork {
 
                                 });
                             }
-
-
-
                         });
-
-
-
-
                     }
 
 
@@ -504,16 +500,17 @@ export default class LiNetwork {
     };
 
     recovery(mode?: string) {
-        let config = this.liconfig;
+        const config = this.liconfig;
 
         return new Promise(function (resolve, reject) {
             getinterfa(config.wifi_interface).then(function (interf: IDevice) {
-                let wifi_exist: string = interf.interface;
-                recovery_mode(config, wifi_exist, mode).then(function (answer) {
+
+                recovery_mode(config, interf.interface, mode).then(function (answer) {
                     resolve(answer);
                 }).catch(function (err) {
                     reject(err);
                 });
+
             }).catch(function (err) {
                 reject(err);
             });
