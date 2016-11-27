@@ -6,8 +6,8 @@ options.wpasupplicant_path=__dirname+'/wpa_supplicant.conf'
 
 const LINET=new linet(options);
 console.log(LINET)
- LINET.wifi_switch('host').then(function(status){
-  verb(status,'info','LINETWORKING HOST')
+ LINET.wifi_switch('ap').then(function(status){
+  verb(status,'info','LINETWORKING AP')
  }).catch(function(err){
    console.log('error')
   verb(err,'error','LINETWORKING init')
