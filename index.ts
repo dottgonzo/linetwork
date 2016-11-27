@@ -728,9 +728,11 @@ export default class LiNetwork {
                                                             that.hostapd.client(true).then(function (answer) {
                                                                 that.mode = 'client'
                                                                 clearInterval(scannet)
+                                                                console.log('connected')
 
                                                                 resolve({ conection: true, recovery: false });
                                                             }).catch(() => {
+                                                                console.log('no networks for now')
                                                                 that.recovery(true)
                                                             })
 
