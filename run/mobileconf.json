@@ -1,0 +1,19 @@
+{
+    "port": 4000,
+    "wpasupplicant_path": "/etc/wpa_supplicant/wpa_supplicant.conf",
+    "hostapd": {
+        "driver": "nl80211",
+        "ssid": "testttap",
+        "wpa_passphrase": "testpass"
+    },
+    "mobile": {
+        "provider": {
+            "label": "Tre Ricaricabile",
+            "apn": "tre.it",
+            "phone": "*99#",
+            "username": "tre",
+            "password": "tre"
+        },
+        "device": "1-1.4"
+    }
+}
