@@ -221,8 +221,8 @@ function recoverycheck(config: ILiNetworkConf): Promise<{ device: INetwork, know
 
                     _.map(device.scan, function (netscan: IScan) {
 
-                        _.map(WM.listwpa, function (wpaitem: IScan) {
-                            if (wpaitem.essid === netscan.essid) {
+                        _.map(WM.listwpa, function (wpaitem) {
+                            if (wpaitem.ssid === netscan.essid) {
                                 somenetwork_exists = true;
 
                             }
@@ -400,6 +400,56 @@ export default class LiNetwork {
         });
 
     };
+    wifiavailable(): Promise<IScan[]> {
+        const that = this;
+
+        return new Promise<IScan[]>(function (resolve, reject) {
+            const availablenets = []
+            that.networks().then((nets) => {
+                _.map(nets, (net) => {
+                    if (net.type === "wifi" && net.scan) {
+                        _.map(net.scan, (scannedone) => {
+                            availablenets.push(scannedone)
+                        })
+
+                    }
+
+                })
+            }).catch((err) => {
+                reject(err)
+            })
+
+
+        })
+
+    }
+
+    wificonnectable(): Promise<IScan[]> {
+        const that = this;
+
+        return new Promise<IScan[]>(function (resolve, reject) {
+            const connectables = []
+            const WM = that.wpamanager()
+
+            that.wifiavailable().then((scans) => {
+                _.map(scans, (scannedone) => {
+                    _.map(WM.listwpa, (wpa) => {
+
+                        if (wpa.ssid === scannedone.essid) {
+                            connectables.push(scannedone)
+                        }
+                    })
+
+                })
+            }).catch((err) => {
+                reject(err)
+            })
+        })
+
+    }
+
+
+
     networks(): Promise<INetwork[]> {
         return new Promise<INetwork[]>(function (resolve, reject) {
 
@@ -618,17 +668,44 @@ export default class LiNetwork {
                             };
 
                             if (that.liconfig.mobile) {
-                                if (recovery && wifi_exist) {
+                                if (recovery && wifi_exist) { // todo: to be controlled
                                     console.log("recovering")
                                     that.hostapdconf(confhapds)
 
                                     that.recovery(true)
+
+                                    that.mobile.configure().then(function () {
+                                        that.mode = "wv";
+                                        console.log("modem started")
+                                        that.mobile.connect(true).then(function (a) {
+
+                                            hwrestart("unplug")
+
+
+                                        }).catch(function () {
+                                            console.log("modem error")
+
+                                            hwrestart("unplug")
+
+                                        });
+                                    }).catch(function (e) {
+                                        console.log(e)
+                                        console.log("modem error")
+
+                                        hwrestart("unplug")
+
+                                    });
+
+
+
+
+
                                 } else if (wifi_exist) {
 
                                     that.hostapdconf(confhapds)
 
 
-                                    that.hostapd.client(true).then(function (answer) {
+                                    that.hostapd.client(true, true).then(function (answer) {
                                         console.log("wificlient connected ")
                                     }).catch(function (err) {
 
@@ -678,6 +755,23 @@ export default class LiNetwork {
                                     if (recovery) {
                                         that.recovery(true).then(function (answer) {
                                             verb(answer, "info", "LINETWORKING recovery mode start");
+
+
+                                            function reconnect() {
+                                                clearInterval(scannet)
+                                                that.connection()
+                                            }
+
+
+                                            const scannet = setInterval(() => {
+                                                that.wificonnectable().then((nets) => {
+                                                    if (nets.length > 0) reconnect()
+                                                })
+
+                                            }, 90000)
+
+
+
                                         }).catch(function (err) {
                                             verb(err, "error", "LINETWORKING recovery mode start");
 
