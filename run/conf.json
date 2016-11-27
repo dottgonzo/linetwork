@@ -6,5 +6,14 @@
         "ssid": "testttap",
         "wpa_passphrase": "testpass"
     },
-    "mobile": false
+    "mobile": {
+        "provider": {
+            "label": "Tre Ricaricabile",
+            "apn": "tre.it",
+            "phone": "*99#",
+            "username": "tre",
+            "password": "tre"
+        },
+        "device": "1-1.4"
+    }
 }
