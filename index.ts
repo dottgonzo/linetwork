@@ -869,6 +869,8 @@ export default class LiNetwork {
                         reject(err);
                     });
 
+                } else {
+                    reject('try client or force')
                 }
 
             }).catch(function (err) {
