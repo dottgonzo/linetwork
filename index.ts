@@ -183,23 +183,17 @@ function getwifiinterfa(setted?: string): Promise<INetwork> {
 }
 
 
-function recovery_mode(config: ILiNetworkConf, dev: string, apswitch, mode?: Imode): Promise<Imode> {
+function recovery_mode(apswitch): Promise<Imode> {
 
 
     return new Promise<Imode>(function(resolve, reject) {
 
-        let m: Imode;
 
-        if (mode) {
-            m = mode;
 
-        } else {
-            m = "host";
-        }
 
-        apswitch[m]().then(function(answer) {
-            verb(answer, "warn", "linetwork recovery mode "+mode);
-            resolve(m);
+        apswitch.host().then(function(answer) {
+            verb(answer, "warn", "linetwork recovery mode ");
+            resolve('host');
         }).catch(function(err) {
             verb(err, "error", "linetwork recovery mode failed");
             reject(err);
@@ -628,7 +622,7 @@ export default class LiNetwork {
                                     console.log("recovering")
                                     that.hostapdconf(confhapds)
 
-                                    recovery_mode(that.liconfig, wifi_exist, that.hostapd)
+                                    recovery_mode(that.hostapd)
                                 } else if (wifi_exist) {
 
                                     that.hostapdconf(confhapds)
@@ -679,7 +673,7 @@ export default class LiNetwork {
                                     resolve({ conection: true, recovery: false });
                                 }).catch(function(err) {
                                     if (recovery) {
-                                        recovery_mode(that.liconfig, wifi_exist, that.hostapd).then(function(answer) {
+                                        recovery_mode(that.hostapd).then(function(answer) {
                                             verb(answer, "info", "J5 recovery mode start");
                                         }).catch(function(err) {
                                             verb(err, "error", "J5 recovery mode start");
@@ -769,7 +763,7 @@ export default class LiNetwork {
                         hostapd: that.liconfig.hostapd
                     })
 
-                    recovery_mode(config, interf.interface, that.hostapd).then(function(answer) {
+                    recovery_mode(that.hostapd).then(function(answer) {
                         that.mode = answer;
                         resolve(answer);
                     }).catch(function(err) {
