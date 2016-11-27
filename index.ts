@@ -777,6 +777,8 @@ export default class LiNetwork {
 
 
                                         });
+                                    } else {
+                                        console.log('not connected')
                                     }
                                 });
                             }
