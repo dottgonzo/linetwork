@@ -7,8 +7,8 @@ options.wpasupplicant_path=__dirname+'/wpa_supplicant.conf'
 
 const LINET=new linet(options);
  LINET.recovery().then(function(status){
-  verb(status,'info','J5 init')
+  verb(status,'info','LINETWORKING init')
  }).catch(function(err){
    console.log('error')
-  verb(err,'error','J5 init')
+  verb(err,'error','LINETWORKING init')
  })

@@ -194,7 +194,7 @@ function recovery_mode(config: ILiNetworkConf, dev: string, apswitch, mode?: Imo
             m = mode;
 
         } else {
-            m = "host";
+            m = "ap";
         }
 
         apswitch[m]().then(function(answer) {

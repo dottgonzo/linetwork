@@ -8,8 +8,8 @@ options.wpasupplicant_path=__dirname+'/wpa_supplicant.conf'
 const LINET=new linet(options);
 console.log(LINET)
  LINET.wifi_switch('client').then(function(status){
-  verb(status,'info','J5 wifi client')
+  verb(status,'info','LINETWORKING wifi client')
  }).catch(function(err){
    console.log('error')
-  verb(err,'error','J5 init')
+  verb(err,'error','LINETWORKING init')
  })
