@@ -6,5 +6,6 @@
         "ssid": "testttap",
         "wpa_passphrase": "testpass"
     },
-    "mobile": false
+    "mobile": false,
+    "recovery":true
 }
