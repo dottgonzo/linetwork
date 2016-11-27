@@ -198,7 +198,7 @@ function recovery_mode(config: ILiNetworkConf, dev: string, apswitch, mode?: Imo
         }
 
         apswitch[m]().then(function(answer) {
-            verb(answer, "warn", "linetwork recovery mode");
+            verb(answer, "warn", "linetwork recovery mode "+mode);
             resolve(m);
         }).catch(function(err) {
             verb(err, "error", "linetwork recovery mode failed");
