@@ -1,10 +1,12 @@
 import * as Promise from "bluebird";
 import * as fs from "fs";
+import * as child_process from "child_process";
 import * as _ from "lodash";
+import * as async from "async";
 import Providers = require("mobile-providers");
 import Wpamanager from "wpasupplicant-manager";
 import hostapdswitch from "hostapd_switch";
-import testinternet = require("promise-test-connection");
+import testinternet from "promise-test-connection";
 import merge from "json-add";
 import Wvdial from "wvdialjs";
 
@@ -12,27 +14,6 @@ import Wvdial from "wvdialjs";
 import netw from "netw";
 const verb = require("verbo");
 const hwrestart = require("hwrestart");
-
-
-interface netw {
-    (): Promise<Network[]>
-}
-
-interface Scan {
-    essid: string;
-    mac: string;
-    signal: string;
-}
-
-interface Network {
-    type: string;
-    mac: string;
-    interface: string;
-    essid?: string;
-    scan?: Scan[];
-    ip?: string;
-    gateway?: string;
-}
 
 
 
@@ -54,70 +35,25 @@ interface IGlobalProviders {
 }
 
 
-function getinterfa(setted?: string) {
+type Imode = 'ap' | 'host' | 'client' | 'unmanaged' | 'wv' | 'ethernet'
 
-    return new Promise<IDevice>(function (resolve, reject) {
-        let wifi_exist: any = false;
-        let devi: IDevice;
-        netw().then(function (networks) {
 
-            _.map(networks, function (device: IDevice) {
-
-                if (device.type === "wifi" && (!setted || setted === "auto" || setted === device.interface)) {
-                    wifi_exist = device.interface;
-                    devi = device;
-                }
-            });
-
-            if (wifi_exist) {
-                resolve(devi);
-            } else {
-                reject({ error: "device not founded" });
-            }
-
-        }).catch(function (err) {
-            reject(err);
-        });
-
-    });
-
+interface IScan {
+    essid: string;
+    mac: string;
+    signal: string;
 }
 
+type INetworkType = 'wifi' | 'wired'
 
-function recovery_mode(config: ILiNetworkConf, dev: string, mode?: string) {
-    let m: string;
-
-    if (mode) {
-        m = mode;
-
-    } else {
-        m = "host";
-    }
-
- 
- 
-
-    const apswitch = new hostapdswitch({
-        interface: dev,
-        wpasupplicant_path: config.wpasupplicant_path,
-        hostapd: config.hostapd
-    });
-
-    return new Promise<boolean>(function (resolve, reject) {
-        apswitch[m]().then(function (answer) {
-            verb(answer, "warn", "linetwork recovery mode");
-            resolve(true);
-        }).catch(function (err) {
-            verb(err, "error", "linetwork recovery mode failed");
-            reject(err);
-        });
-    });
-}
-
-
-interface IDevice {
-    type: string;
+interface INetwork {
+    type: INetworkType;
+    mac: string;
     interface: string;
+    essid?: string;
+    scan?: IScan[];
+    ip?: string;
+    gateway?: string;
 }
 
 interface ClassOpt {
@@ -132,12 +68,42 @@ interface IMobile {
     configFilePath?: string;
 
 }
+
+interface IEthernet {
+    interface: string;
+    dhcp?: {
+        ip?: string;
+        gateway?: string;
+        netmask?: string;
+        bcast?: string;
+    }
+}
+
 interface ILiNetworkConf {
     wifi_interface: string;
     mobile?: IMobile;
     hostapd: IHostapd;
     wpasupplicant_path?: string;
+    ethernet?: IEthernet[],
+    recovery: boolean
 }
+interface ILiNetworkConfParams {
+    wifi_interface?: string;
+    mobile?: IMobile;
+    hostapd?: IHostapd;
+    wpasupplicant_path?: string;
+    ethernet?: {
+        interface: string;
+        dhcp?: {
+            ip?: string;
+            gateway?: string;
+            netmask?: string;
+            bcast?: string;
+        }
+    },
+    recovery?: true
+}
+
 interface IHostapd {
     driver: string;
     ssid: string;
@@ -148,16 +114,25 @@ interface IHostapdcf {
     ssid: string;
     wpa_passphrase: any;
 };
+
+interface IHostapdCf {
+    driver?: string;
+    ssid?: string;
+    wpa_passphrase?: string;
+};
+
 interface IDnsmasq {
     interface: string;
 };
-
+interface IDnsmasqCf {
+    interface?: string;
+};
 interface IHConf {
-    interface: string;
-    wpasupplicant_path: string;
-    hostapd: IHostapd;
-    dnsmasq: IDnsmasq;
-    redirect: boolean;
+    interface?: string;
+    wpasupplicant_path?: string;
+    hostapd?: IHostapdCf;
+    redirect?: boolean;
+    dnsmasq?: IDnsmasqCf;
 };
 
 interface IConnection {
@@ -175,28 +150,143 @@ interface IInit {
     details?: IConnection;
 }
 
-const config: ILiNetworkConf = {
-    hostapd: {
-        driver: "nl80211",
-        ssid: "testttap",
-        wpa_passphrase: "testpass"
-    },
-    wifi_interface: "auto",
-    wpasupplicant_path: "/etc/wpa_supplicant/wpa_supplicant.conf"
-};
+
+
+
+function getwifiinterfa(setted?: string): Promise<INetwork> {
+
+    return new Promise<INetwork>(function(resolve, reject) {
+        let wifi_exist: boolean = false;
+        let devi: INetwork;
+        netw().then(function(networks) {
+
+            _.map(networks, function(device) {
+
+                if (device.type === "wifi" && !wifi_exist && (!setted || setted === "auto" || setted === device.interface)) {
+                    wifi_exist = true;
+                    devi = device;
+                }
+            });
+
+            if (wifi_exist) {
+                resolve(devi);
+            } else {
+                reject({ error: "device not founded" });
+            }
+
+        }).catch(function(err) {
+            reject(err);
+        });
+
+    });
+
+}
+
+
+function recovery_mode(config: ILiNetworkConf, dev: string, apswitch, mode?: Imode): Promise<Imode> {
+
+
+    return new Promise<Imode>(function(resolve, reject) {
+
+        let m: Imode;
+
+        if (mode) {
+            m = mode;
+
+        } else {
+            m = "host";
+        }
+
+        apswitch[m]().then(function(answer) {
+            verb(answer, "warn", "linetwork recovery mode");
+            resolve(m);
+        }).catch(function(err) {
+            verb(err, "error", "linetwork recovery mode failed");
+            reject(err);
+        });
+    });
+}
+
+
+function recoverycheck(config: ILiNetworkConf): Promise<{ device: INetwork, known_networks: boolean }> {
+
+    return new Promise<{ device: INetwork, known_networks: boolean }>(function(resolve, reject) {
+
+        let somenetwork_exists: boolean = false;
+        let wlan_exists: boolean = false;
+
+        let devi: INetwork;
+
+        netw().then(function(networks) {
+
+            _.map(networks, function(device) {
+
+                if (device.scan && device.type === "wifi" && !somenetwork_exists && (!config.wifi_interface || config.wifi_interface === "auto" || config.wifi_interface === device.interface)) {
+
+                    const WM = new Wpamanager(config.wpasupplicant_path)
+
+                    _.map(device.scan, function(netscan: IScan) {
+
+                        _.map(WM.listwpa, function(wpaitem: IScan) {
+                            if (wpaitem.essid === netscan.essid) {
+                                somenetwork_exists = true;
+
+                            }
+                        })
+                    })
+                }
+                if (!wlan_exists && device.type === "wifi" && (!config.wifi_interface || config.wifi_interface === "auto" || config.wifi_interface === device.interface)) {
+                    wlan_exists = true;
+                    devi = device;
+                }
+            });
+
+            if (!somenetwork_exists && wlan_exists) {
+                resolve({ device: devi, known_networks: false });
+            } else if (wlan_exists) {
+                resolve({ device: devi, known_networks: true });
+            } else {
+                reject('no interface')
+            }
+
+        }).catch(function(err) {
+            reject({ error: err, description: 'netw err' });
+        });
+
+    });
+
+
+}
+
 
 
 export default class LiNetwork {
     liconfig: ILiNetworkConf;
-    hostapd: IHConf;
-    mobile;
-    mode: string;
+    hostapd: hostapdswitch;
+    mobile: Wvdial;
+    mode: Imode;
+    isConnected: boolean;
 
 
-    constructor(data) {
+    constructor(data: ILiNetworkConfParams) {
 
-        merge(config, data);
 
+        const config: ILiNetworkConf = {
+            hostapd: {
+                driver: "nl80211",
+                ssid: "testttap",
+                wpa_passphrase: "testpass"
+            },
+            wifi_interface: "auto",
+            wpasupplicant_path: "/etc/wpa_supplicant/wpa_supplicant.conf",
+            ethernet: [{
+                interface: 'eth0'
+            }],
+            recovery: false
+        };
+
+        merge(config, data); // combine default settings with new parameters from data
+        this.mode = 'unmanaged'
 
         this.liconfig = config;
 
@@ -211,15 +301,98 @@ export default class LiNetwork {
     }
 
 
-    mobileconnect(bool) {
-        const Wv = this.mobile;
-        return new Promise<boolean>(function (resolve, reject) {
-            Wv.configure(bool).then(function () {
-                Wv.connect(true).then(function () {
 
+    ethernetconnect(devicename?: string): Promise<boolean> {
+        const that = this
+        return new Promise<boolean>(function(resolve, reject) {
+            if (that.liconfig.ethernet) {
+
+                const connectiondevicesarray: INetwork[] = [];
+
+                let deviceexists: boolean = false
+                let device: INetwork;
+                // cheeck configuration
+                netw().then((a) => {
+                    _.map(a, (net) => {
+                        _.map(that.liconfig.ethernet, (netinterfaceconfigured) => {
+
+                            if (net.type === 'wired' && ((!devicename && net.interface === netinterfaceconfigured.interface) || devicename === net.interface)) {
+                                deviceexists = true
+                                device = net
+                                connectiondevicesarray.push(net)
+                            }
+
+                        })
+                    })
+
+                    if (deviceexists) {
+
+                        let connected: boolean = false;
+
+                        async.eachSeries(connectiondevicesarray, (device, cb) => {
+                            if (!connected) {
+                                child_process.exec('ifconfig ' + device.interface + ' down && ifconfig ' + device.interface + ' up && dhclient ' + device.interface, (err, stdout, stderr) => {
+                                    if (err) {
+                                        cb()
+                                    } else {
+                                        that.testinternet().then(()=>{
+                                    connected = true
+
+                                        cb()
+                                        })
+    
+                                    }
+                                })
+                            } else {
+                                cb()
+                            }
+
+                        }, (err) => {
+                            if (!connected) {
+                                reject('no connection by a ethernet device')
+
+                            } else {
+                                resolve(true)
+
+                            }
+                        })
+                        // need async to process everyone
+
+                    } else {
+                        reject('no ethernet device')
+                    }
+
+
+                })
+
+                // check if it is just connected by eth0
+                // if is connected all ok.
+                // else that.ethernetreconnect(device)
+            } else {
+                reject('invalid ethernet conf')
+
+            }
+        });
+
+
+    }
+
+    ethernetreconnect(device?: any) {
+        const that = this
+
+    }
+
+    mobileconnect(bool: boolean) {
+        const that = this;
+
+        const Wv = that.mobile;
+        return new Promise<boolean>(function(resolve, reject) {
+            Wv.configure(bool).then(function() {
+                Wv.connect(true).then(function() {
+                    that.mode = 'wv'
                     console.log("modem started");
 
-                }).catch(function (err) {
+                }).catch(function(err) {
                     console.log("modem error");
                     reject(err);
 
@@ -233,9 +406,58 @@ export default class LiNetwork {
         });
 
     };
-    networks() {
+    networks(): Promise<INetwork[]> {
+        return new Promise<INetwork[]>(function(resolve, reject) {
 
-        return netw();
+            netw().then(function(a) {
+                resolve(a)
+            }).catch(function(err) {
+                reject(err)
+            })
+        })
+    }
+    network(devicename: string): Promise<INetwork> {
+        const that = this;
+        let netexists: boolean = false
+        let networkinterface: INetwork;
+        return new Promise<INetwork>(function(resolve, reject) {
+
+            that.networks().then(function(a) {
+                _.map(a, (net) => {
+                    if (!netexists && net.interface === devicename) {
+                        netexists = true
+                        networkinterface = net
+                    }
+                })
+                if (netexists) {
+                    resolve(networkinterface)
+                } else {
+                    reject('no network')
+                }
+            }).catch(function(err) {
+                reject(err)
+            })
+        })
+    }
+
+    testinternet() {
+        return new Promise(function(resolve, reject) {
+
+            testinternet().then(function(a) {
+                resolve(a)
+            }).catch(function(err) {
+                reject(err)
+            });
+        });
+    }
+
+    hostapdconf(hconfig: IHConf, reconf?: true) { // reconf is experimental
+        const that = this
+        if (!hconfig) {
+            throw Error('no config provided to configure hostapdconf')
+        } else if (!that.hostapd || reconf) {
+            that.hostapd = new hostapdswitch(hconfig, true);
+        }
 
     }
 
@@ -253,49 +475,49 @@ export default class LiNetwork {
 
     wifi_switch(mode: string, dev?: string) {
         console.log(mode, dev);
-        if (dev || this.liconfig.wifi_interface !== "auto") {
-            let apswitch:hostapdswitch
-            if (dev) {
-                apswitch = new hostapdswitch(
-                    {
-                        interface: dev,
-                        wpasupplicant_path: config.wpasupplicant_path,
-                        hostapd: this.hostapd
+        const that = this;
+        const config = that.liconfig;
 
-                    }
-                );
-            } else {
-                apswitch = new hostapdswitch(
-                    {
-                        interface: this.liconfig.wifi_interface,
-                        wpasupplicant_path: config.wpasupplicant_path,
-                        hostapd: this.hostapd
-                    }
-                );
-            }
-            console.log("dev mode");
-            return new Promise<boolean>(function (resolve, reject) {
+        if (dev || this.liconfig.wifi_interface !== "auto") {
+
+            return new Promise<boolean>(function(resolve, reject) {
+
+
+                if (!dev) {
+                    dev = config.wifi_interface;
+                }
+
+                console.log("dev mode");
+                that.hostapdconf({
+                    interface: dev,
+                    wpasupplicant_path: config.wpasupplicant_path,
+                    hostapd: config.hostapd
+                })
+
                 switch (mode) {
                     case "ap":
-                        apswitch.ap().then(function (answer) {
+                        that.hostapd.ap().then(function(answer) {
+                            that.mode = 'ap'
                             resolve(true);
-                        }).catch(function (err) {
+                        }).catch(function(err) {
                             reject(err);
                         });
                         break;
 
                     case "host":
-                        apswitch.host().then(function (answer) {
+                        that.hostapd.host().then(function(answer) {
+                            that.mode = 'host'
                             resolve(true);
-                        }).catch(function (err) {
+                        }).catch(function(err) {
                             reject(err);
                         });
                         break;
 
                     case "client":
-                        apswitch.client().then(function (answer) {
+                        that.hostapd.client().then(function(answer) {
+                            that.mode = 'client'
                             resolve(true);
-                        }).catch(function (err) {
+                        }).catch(function(err) {
                             reject(err);
                         });
                         break;
@@ -307,47 +529,48 @@ export default class LiNetwork {
         } else {
             console.log("auto mode");
             const config = this.liconfig;
-            return new Promise(function (resolve, reject) {
-                netw().then(function (networks) {
+            return new Promise(function(resolve, reject) {
+                netw().then(function(networks) {
 
-                    _.map(networks, function (device: IDevice) {
+                    _.map(networks, function(device) {
                         if (device.type === "wifi") {
                             dev = device.interface;
                         }
                     });
                     if (dev) {
 
-                        const apswitch = new hostapdswitch(
-                            {
-                                interface: dev,
-                                hostapd: config.hostapd,
-                                wpasupplicant_path: config.wpasupplicant_path
-                            }
-                        );
+                        that.hostapdconf({
+                            interface: dev,
+                            hostapd: config.hostapd,
+                            wpasupplicant_path: config.wpasupplicant_path
+                        })
 
-                        console.log(apswitch);
+                        console.log(that.hostapd);
 
                         switch (mode) {
                             case "ap":
-                                apswitch.ap().then(function (answer) {
+                                that.hostapd.ap().then(function(answer) {
+                                    that.mode = 'ap'
                                     resolve(true);
-                                }).catch(function (err) {
+                                }).catch(function(err) {
                                     reject(err);
                                 });
                                 break;
 
                             case "host":
-                                apswitch.host().then(function (answer) {
+                                that.hostapd.host().then(function(answer) {
+                                    that.mode = 'host'
                                     resolve(true);
-                                }).catch(function (err) {
+                                }).catch(function(err) {
                                     reject(err);
                                 });
                                 break;
 
                             case "client":
-                                apswitch.client().then(function (answer) {
+                                that.hostapd.client().then(function(answer) {
+                                    that.mode = 'client'
                                     resolve(true);
-                                }).catch(function (err) {
+                                }).catch(function(err) {
                                     reject(err);
                                 });
                                 break;
@@ -356,7 +579,7 @@ export default class LiNetwork {
                     } else {
                         reject({ error: "no dev" });
                     }
-                }).catch(function (err) {
+                }).catch(function(err) {
                     reject(err);
                 });
             });
@@ -364,134 +587,164 @@ export default class LiNetwork {
     };
 
 
-    connection(recovery?: boolean) {
-        let mode = this.mode;
-        let config = this.liconfig;
-        let Wv = this.mobile;
-        return new Promise<IInit>(function (resolve, reject) {
-            verb(config, "debug", "Tryng to connect");
 
-            if (mode === "mobile-auto") {
+
+
+    connection() {
+        const that = this;
+        const recovery = that.liconfig.recovery
+
+        return new Promise(function(resolve, reject) {
+            verb(that.liconfig, "debug", "Tryng to connect");
+
+            if (that.mode === "wv") {
                 reject("auto mode")
                 console.log("wv running, nothing to do")
             } else {
 
 
+                that.testinternet().then(() => {
+                    resolve(true)
+                }).catch((err) => {
 
 
-                getinterfa(config.wifi_interface).then(function (interf: IDevice) {
+                    that.ethernetconnect().then(() => {
+                        console.log('connected by ethernet')
 
-                    const wifi_exist: string = interf.interface;
+                    }).catch(() => {
 
-                    const confhapds = {
-                        interface: wifi_exist,
-                        wpasupplicant_path: config.wpasupplicant_path,
-                        hostapd: config.hostapd
-                    };
+                        getwifiinterfa(that.liconfig.wifi_interface).then(function(interf) {
 
+                            const wifi_exist: string = interf.interface;
 
+                            const confhapds = {
+                                interface: wifi_exist,
+                                wpasupplicant_path: that.liconfig.wpasupplicant_path,
+                                hostapd: that.liconfig.hostapd
+                            };
 
-                    if (config.mobile) {
-                        if (recovery && wifi_exist) {
-                            console.log("recovering")
-                            recovery_mode(config, wifi_exist)
-                        } else if (wifi_exist) {
-                            let apswitch = new hostapdswitch({
-                        interface: wifi_exist,
-                        wpasupplicant_path: config.wpasupplicant_path,
-                        hostapd: config.hostapd
-                    }, true);
-                            apswitch.client(true).then(function (answer) {
-                                console.log("wificlient connected ")
-                            }).catch(function (err) {
-                                console.log("wificlient no connection" + err)
-                            });
+                            if (that.liconfig.mobile) {
+                                if (recovery && wifi_exist) {
+                                    console.log("recovering")
+                                    that.hostapdconf(confhapds)
+
+                                    recovery_mode(that.liconfig, wifi_exist, that.hostapd)
+                                } else if (wifi_exist) {
+
+                                    that.hostapdconf(confhapds)
 
 
-                            Wv.configure().then(function () {
-                                mode = "mobile-auto";
-                                console.log("modem started")
-                                Wv.connect(true).then(function (a) {
+                                    that.hostapd.client(true).then(function(answer) {
+                                        console.log("wificlient connected ")
+                                    }).catch(function(err) {
+                                        console.log("wificlient no connection" + err)
+                                    });
 
-                                    hwrestart("unplug")
+
+                                    that.mobile.configure().then(function() {
+                                        that.mode = "wv";
+                                        console.log("modem started")
+                                        that.mobile.connect(true).then(function(a) {
+
+                                            hwrestart("unplug")
 
 
-                                }).catch(function () {
+                                        }).catch(function() {
+                                            console.log("modem error")
+
+                                            hwrestart("unplug")
+
+                                        });
+                                    }).catch(function(e) {
+                                        console.log(e)
+                                        console.log("modem error")
+
+                                        hwrestart("unplug")
+
+                                    });
+
+
+
+                                }
+                            } else if (wifi_exist) {
+
+
+                                verb(wifi_exist, "info", "Wlan interface founded");
+
+                                that.hostapdconf(confhapds)
+
+
+                                that.hostapd.client(true).then(function(answer) {
+                                    that.mode = 'ap'
+                                    resolve({ conection: true, recovery: false });
+                                }).catch(function(err) {
+                                    if (recovery) {
+                                        recovery_mode(that.liconfig, wifi_exist, that.hostapd).then(function(answer) {
+                                            verb(answer, "info", "J5 recovery mode start");
+                                        }).catch(function(err) {
+                                            verb(err, "error", "J5 recovery mode start");
+
+
+                                        });
+                                    }
+                                });
+                            }
+
+
+
+                        }).catch(function(err) {
+
+                            verb("no wifi", "warn", "networker");
+
+                            if (that.liconfig.mobile) {
+
+
+
+                                that.mobile.configure().then(function() {
+                                    that.mode = "wv";
+                                    that.mobile.connect(true).then(function(a) {
+                                        console.log(a)
+                                        hwrestart("unplug")
+
+
+                                    }).catch(function(e) {
+                                        console.log(e)
+                                        console.log("modem error")
+
+                                        hwrestart("unplug")
+
+                                    });
+                                }).catch(function(e) {
+                                    console.log(e)
                                     console.log("modem error")
 
                                     hwrestart("unplug")
 
                                 });
-                            }).catch(function (e) {
-                                console.log(e)
-                                console.log("modem error")
 
+
+                            } else {
+                                console.log("no wifi!!???")
                                 hwrestart("unplug")
-
-                            });
-
-
-
-                        }
-                    } else if (wifi_exist) {
-
-
-                        verb(wifi_exist, "info", "Wlan interface founded");
-                        const apswitch = new hostapdswitch(confhapds, true);
-                        apswitch.client(true).then(function (answer) {
-                            resolve({ conection: true, recovery: false });
-                        }).catch(function (err) {
-                            if (recovery) {
-                                recovery_mode(config, wifi_exist).then(function (answer) {
-                                    verb(answer, "info", "J5 recovery mode start");
-                                }).catch(function (err) {
-                                    verb(err, "error", "J5 recovery mode start");
-
-
-                                });
                             }
-                        });
-                    }
-
-
-
-                }).catch(function (err) {
-
-                    verb("no wifi", "warn", "networker");
-
-                    if (config.mobile) {
-
-
-
-                        Wv.configure().then(function () {
-                            mode = "mobile-auto";
-                            Wv.connect(true).then(function (a) {
-                                console.log(a)
-                                hwrestart("unplug")
-
-
-                            }).catch(function (e) {
-                                console.log(e)
-                                console.log("modem error")
-
-                                hwrestart("unplug")
-
-                            });
-                        }).catch(function (e) {
-                            console.log(e)
-                            console.log("modem error")
-
-                            hwrestart("unplug")
 
                         });
 
 
-                    } else {
-                        console.log("no wifi!!???")
-                        hwrestart("unplug")
-                    }
 
-                });
+                    })
+
+
+
+
+
+                })
+
+
+
+
+
+
 
             }
 
@@ -499,19 +752,33 @@ export default class LiNetwork {
         });
     };
 
-    recovery(mode?: string) {
+    recovery(force?: true) {
         const config = this.liconfig;
+        const that = this;
 
-        return new Promise(function (resolve, reject) {
-            getinterfa(config.wifi_interface).then(function (interf: IDevice) {
+        return new Promise(function(resolve, reject) {
+            recoverycheck(config).then(function(a) {
 
-                recovery_mode(config, interf.interface, mode).then(function (answer) {
-                    resolve(answer);
-                }).catch(function (err) {
-                    reject(err);
-                });
+                const interf = a.device
+                if (force || !a.known_networks) {
 
-            }).catch(function (err) {
+
+                    that.hostapdconf({
+                        interface: a.device.interface,
+                        wpasupplicant_path: that.liconfig.wpasupplicant_path,
+                        hostapd: that.liconfig.hostapd
+                    })
+
+                    recovery_mode(config, interf.interface, that.hostapd).then(function(answer) {
+                        that.mode = answer;
+                        resolve(answer);
+                    }).catch(function(err) {
+                        reject(err);
+                    });
+
+                }
+
+            }).catch(function(err) {
                 reject(err);
             });
         });

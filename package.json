@@ -1,13 +1,13 @@
 {
   "name": "linetwork",
-  "version": "0.0.65",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "#mocha",
     "push": "git add -A && git commit -m 'fix' && git push",
     "boot": "node run/boot.js",
-    "wifiswitch-host": "node bin/switch_host.js"
+    "wifiswitch-host": "node run/switch_host.js"
   },
   "repository": {
     "type": "git",
@@ -38,14 +38,15 @@
     "typescript": "^2.0.10"
   },
   "dependencies": {
+    "async": "^2.1.4",
     "bluebird": "^3.1.1",
-    "hostapd_switch": "^0.0.97",
+    "hostapd_switch": "^0.2.1",
     "hwrestart": "^0.0.12",
     "json-add": "^0.1.0",
     "lodash": "^3.10.1",
     "mobile-providers": "^1.0.1",
-    "netw": "^0.0.65",
-    "promise-test-connection": "0.0.30",
+    "netw": "^0.1.0",
+    "promise-test-connection": "^0.0.32",
     "promised-exec": "^1.0.1",
     "verbo": "0.0.9",
     "wpasupplicant-manager": "^0.0.8",
