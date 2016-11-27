@@ -3,6 +3,7 @@ const verb=require('verbo');
 
 const options=require('./conf.json')
 
+options.wpasupplicant_path=__dirname+'/wpa_supplicant.conf'
 
 let LINET=new linet(options);
 console.log(LINET)
