@@ -654,6 +654,7 @@ export default class LiNetwork {
 
                     that.ethernetconnect().then(() => {
                         console.log('connected by ethernet')
+                        resolve(true)
 
                     }).catch(() => {
 
@@ -667,47 +668,21 @@ export default class LiNetwork {
                                 hostapd: that.liconfig.hostapd
                             };
 
-                            if (that.liconfig.mobile) {
-                                if (recovery && wifi_exist) { // todo: to be controlled
-                                    console.log("recovering")
-                                    that.hostapdconf(confhapds)
-
-                                    that.recovery(true)
-
-                                    that.mobile.configure().then(function () {
-                                        that.mode = "wv";
-                                        console.log("modem started")
-                                        that.mobile.connect(true).then(function (a) {
-
-                                            hwrestart("unplug")
+                            if (wifi_exist) {
 
 
-                                        }).catch(function () {
-                                            console.log("modem error")
+                                verb(wifi_exist, "info", "Wlan interface founded");
 
-                                            hwrestart("unplug")
-
-                                        });
-                                    }).catch(function (e) {
-                                        console.log(e)
-                                        console.log("modem error")
-
-                                        hwrestart("unplug")
-
-                                    });
+                                that.hostapdconf(confhapds)
 
 
+                                that.hostapd.client(true).then(function (answer) {
+                                    that.mode = 'client'
+                                    resolve({ conection: true, recovery: false });
+                                }).catch(function (err) {
 
 
-
-                                } else if (wifi_exist) {
-
-                                    that.hostapdconf(confhapds)
-
-
-                                    that.hostapd.client(true, true).then(function (answer) {
-                                        console.log("wificlient connected ")
-                                    }).catch(function (err) {
+                                    if (that.liconfig.mobile) {
 
 
                                         that.mobile.configure().then(function () {
@@ -734,51 +709,39 @@ export default class LiNetwork {
 
 
 
-                                    });
 
 
+                                    }
 
 
-                                }
-                            } else if (wifi_exist) {
-
-
-                                verb(wifi_exist, "info", "Wlan interface founded");
-
-                                that.hostapdconf(confhapds)
-
-
-                                that.hostapd.client(true).then(function (answer) {
-                                    that.mode = 'client'
-                                    resolve({ conection: true, recovery: false });
-                                }).catch(function (err) {
-                                    if (recovery) {
+                                    if (recovery && wifi_exist) {
                                         that.recovery(true).then(function (answer) {
                                             verb(answer, "info", "LINETWORKING recovery mode start");
 
+                                            if (!that.liconfig.mobile) {
+                                                
+                                                const scannet = setInterval(() => {
+                                                    that.wificonnectable().then((nets) => {
+                                                        if (nets.length > 0) {
+                                                            clearInterval(scannet)
+                                                            that.connection()
+                                                        }
+                                                    })
 
-                                            function reconnect() {
-                                                clearInterval(scannet)
-                                                that.connection()
+                                                }, 90000)
+
                                             }
 
-
-                                            const scannet = setInterval(() => {
-                                                that.wificonnectable().then((nets) => {
-                                                    if (nets.length > 0) reconnect()
-                                                })
-
-                                            }, 90000)
-
-
-
                                         }).catch(function (err) {
-                                            verb(err, "error", "LINETWORKING recovery mode start");
+                                            verb(err, "error", "LINETWORKING recovery mode error");
+                                            reject('recovery mode error')
 
 
                                         });
                                     } else {
                                         console.log('not connected')
+                                        reject('not connected')
+
                                     }
                                 });
                             }
