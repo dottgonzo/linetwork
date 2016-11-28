@@ -441,6 +441,7 @@ export default class LiNetwork {
                     })
 
                 })
+                resolve(connectables)
             }).catch((err) => {
                 reject(err)
             })
@@ -737,6 +738,8 @@ export default class LiNetwork {
                                                         } else {
                                                             console.log('waiting for networks')
                                                         }
+                                                    }).catch((err) => {
+                                                        console.log('waiting for networks')
                                                     })
 
                                                 }, 90000)
