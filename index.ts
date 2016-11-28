@@ -188,9 +188,6 @@ function recovery_mode(apswitch): Promise<Imode> {
 
     return new Promise<Imode>(function (resolve, reject) {
 
-
-
-
         apswitch.host().then(function (answer) {
             verb(answer, "warn", "linetwork recovery mode ");
             resolve('host');
@@ -504,6 +501,8 @@ export default class LiNetwork {
             throw Error('no config provided to configure hostapdconf')
         } else if (!that.hostapd || reconf) {
             that.hostapd = new hostapdswitch(hconfig, true);
+        } else {
+            console.log('hostapd was just reconfigured')
         }
 
     }
@@ -738,7 +737,7 @@ export default class LiNetwork {
                                                                 that.recovery(true)
                                                             })
                                                         } else {
-                                                            console.log('waiting for networks')
+                                                            console.log('no knwown wlan available, waiting for networks')
                                                         }
                                                     }).catch((err) => {
                                                         console.log(err)
@@ -834,6 +833,7 @@ export default class LiNetwork {
                 const interf = a.device
                 if (force || !a.known_networks) {
 
+                    console.log('recoveryng ' + a.device.interface)
 
                     that.hostapdconf({
                         interface: a.device.interface,
