@@ -1,6 +1,6 @@
 {
   "name": "linetwork",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,8 +14,8 @@
     "url": "https://github.com/dottgonzo/linetwork.git"
   },
   "bin": {
-    "netstart": "./bin/boot.js",
-    "netrecovery": "./bin/recovery.js"
+    "netstart": "./run/boot.js",
+    "netrecovery": "./run/recovery.js"
   },
   "author": "",
   "license": "ISC",
