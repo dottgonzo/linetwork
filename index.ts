@@ -502,7 +502,7 @@ export default class LiNetwork {
         } else if (!that.hostapd || reconf) {
             that.hostapd = new hostapdswitch(hconfig, true);
         } else {
-            console.log('hostapd was just reconfigured')
+            console.log('hostapd was just configured')
         }
 
     }
@@ -839,7 +839,7 @@ export default class LiNetwork {
                         interface: a.device.interface,
                         wpasupplicant_path: that.liconfig.wpasupplicant_path,
                         hostapd: that.liconfig.hostapd
-                    })
+                    }, true)
 
                     recovery_mode(that.hostapd).then(function (answer) {
                         that.mode = answer;
