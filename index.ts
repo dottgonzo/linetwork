@@ -683,7 +683,7 @@ export default class LiNetwork {
 
                                 that.hostapd.client(true).then(function (answer) {
                                     that.mode = 'client'
-                                    resolve({ conection: true, recovery: false });
+                                    resolve({ conection: true });
                                 }).catch(function (err) {
 
 
