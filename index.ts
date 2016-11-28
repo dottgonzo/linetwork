@@ -400,7 +400,7 @@ export default class LiNetwork {
         });
 
     };
-    wifiavailable(): Promise<IScan[]> {
+    wifiavailables(): Promise<IScan[]> {
         const that = this;
 
         return new Promise<IScan[]>(function (resolve, reject) {
@@ -415,6 +415,8 @@ export default class LiNetwork {
                     }
 
                 })
+                resolve(availablenets)
+
             }).catch((err) => {
                 reject(err)
             })
@@ -424,14 +426,14 @@ export default class LiNetwork {
 
     }
 
-    wificonnectable(): Promise<IScan[]> {
+    wificonnectables(): Promise<IScan[]> {
         const that = this;
 
         return new Promise<IScan[]>(function (resolve, reject) {
             const connectables = []
             const WM = that.wpamanager()
 
-            that.wifiavailable().then((scans) => {
+            that.wifiavailables().then((scans) => {
                 _.map(scans, (scannedone) => {
                     _.map(WM.listwpa, (wpa) => {
 
@@ -721,7 +723,8 @@ export default class LiNetwork {
                                             if (!that.liconfig.mobile) {
 
                                                 const scannet = setInterval(() => {
-                                                    that.wificonnectable().then((nets) => {
+                                                    console.log('check for availables networks')
+                                                    that.wificonnectables().then((nets) => {
                                                         if (nets.length > 0) {
 
                                                             that.hostapd.client(true).then(function (answer) {
