@@ -495,14 +495,17 @@ export default class LiNetwork {
         });
     }
 
-    hostapdconf(hconfig: IHConf, reconf?: true) { // reconf is experimental
+    hostapdconf(hconfig: IHConf) { // reconf is experimental
         const that = this
         if (!hconfig) {
             throw Error('no config provided to configure hostapdconf')
-        } else if (!that.hostapd || reconf) {
-            that.hostapd = new hostapdswitch(hconfig, true);
+
+
         } else {
-            console.log('hostapd was just configured')
+
+            that.hostapd = new hostapdswitch(hconfig, true);
+
+
         }
 
     }
@@ -839,7 +842,7 @@ export default class LiNetwork {
                         interface: a.device.interface,
                         wpasupplicant_path: that.liconfig.wpasupplicant_path,
                         hostapd: that.liconfig.hostapd
-                    }, true)
+                    })
 
                     recovery_mode(that.hostapd).then(function (answer) {
                         that.mode = answer;
