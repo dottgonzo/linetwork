@@ -273,7 +273,7 @@ export default class LiNetwork {
             ethernet: [{
                 interface: 'eth0'
             }],
-            recovery: false
+            recovery: true
         };
 
         merge(config, data); // combine default settings with new parameters from data
