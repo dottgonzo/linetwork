@@ -718,7 +718,6 @@ export default class LiNetwork {
                                     if (recovery && wifi_exist) {
                                         that.recovery(true).then(function (answer) {
                                             verb(answer, "info", "LINETWORKING recovery mode start");
-                                            console.log(that.liconfig.mobile)
                                             if (!that.liconfig.mobile) {
 
                                                 const scannet = setInterval(() => {
@@ -739,7 +738,7 @@ export default class LiNetwork {
                                                             console.log('waiting for networks')
                                                         }
                                                     }).catch((err) => {
-                                                        console.log('waiting for networks')
+                                                        console.log(err)
                                                     })
 
                                                 }, 90000)
