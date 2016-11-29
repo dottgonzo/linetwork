@@ -322,7 +322,7 @@ export default class LiNetwork {
 
                         async.eachSeries(connectiondevicesarray, (device, cb) => {
                             if (!connected) {
-                                child_process.exec('ifconfig ' + device.interface + ' down && ifconfig ' + device.interface + ' up && dhclient ' + device.interface, (err, stdout, stderr) => {
+                                child_process.exec('ifconfig ' + device.interface + ' down && ifconfig ' + device.interface + ' up', (err, stdout, stderr) => {
                                     if (err) {
                                         cb()
                                     } else {
@@ -373,29 +373,29 @@ export default class LiNetwork {
 
     }
 
-    mobileconnect(bool: boolean) {
-        const that = this;
-
-        const Wv = that.mobile;
-        return new Promise<boolean>(function (resolve, reject) {
-            Wv.configure(bool).then(function () {
-                Wv.connect(true).then(function () {
-                    that.mode = 'wv'
-                    console.log("modem started");
-
-                }).catch(function (err) {
-                    console.log("modem error");
-                    reject(err);
+    mobileconnect(reset?: boolean) {
+        const that = this
+        that.mobile.configure(reset).then(function () {
+            that.mode = "wv";
+            that.mobile.connect(true).then(function (a) {
+                console.log(a)
+                hwrestart("unplug")
 
 
-                });
-            })
+            }).catch(function (e) {
+                console.log(e)
+                console.log("modem error")
 
+                hwrestart("unplug")
 
+            });
+        }).catch(function (e) {
+            console.log(e)
+            console.log("modem error")
 
+            hwrestart("unplug")
 
         });
-
     };
     wifiavailables(): Promise<IScan[]> {
         const that = this;
@@ -689,32 +689,7 @@ export default class LiNetwork {
 
                                     if (that.liconfig.mobile) {
 
-
-                                        that.mobile.configure().then(function () {
-                                            that.mode = "wv";
-                                            console.log("modem started")
-                                            that.mobile.connect(true).then(function (a) {
-
-                                                hwrestart("unplug")
-
-
-                                            }).catch(function () {
-                                                console.log("modem error")
-
-                                                hwrestart("unplug")
-
-                                            });
-                                        }).catch(function (e) {
-                                            console.log(e)
-                                            console.log("modem error")
-
-                                            hwrestart("unplug")
-
-                                        });
-
-
-
-
+                                that.mobileconnect()
 
                                     }
 
@@ -764,38 +739,13 @@ export default class LiNetwork {
                                 });
                             }
 
-
-
                         }).catch(function (err) {
 
                             verb("no wifi", "warn", "networker");
 
                             if (that.liconfig.mobile) {
 
-
-
-                                that.mobile.configure().then(function () {
-                                    that.mode = "wv";
-                                    that.mobile.connect(true).then(function (a) {
-                                        console.log(a)
-                                        hwrestart("unplug")
-
-
-                                    }).catch(function (e) {
-                                        console.log(e)
-                                        console.log("modem error")
-
-                                        hwrestart("unplug")
-
-                                    });
-                                }).catch(function (e) {
-                                    console.log(e)
-                                    console.log("modem error")
-
-                                    hwrestart("unplug")
-
-                                });
-
+                                that.mobileconnect()
 
                             } else {
                                 console.log("no wifi!!???")
