@@ -9,7 +9,7 @@ import hostapdswitch from "hostapd_switch";
 import testinternet from "promise-test-connection";
 import merge from "json-add";
 import Wvdial from "wvdialjs";
-import listwificlients from "listwificlients"
+
 
 
 import netw from "netw";
@@ -17,7 +17,13 @@ const verb = require("verbo");
 const hwrestart = require("hwrestart");
 
 
+interface IWifiClient {
+    mac: string;
+    signal: string;
+    signalMin?: string;
+    signalMax?: string;
 
+}
 
 interface IProvider {
 
@@ -637,21 +643,17 @@ export default class LiNetwork {
     };
 
 
-    listwificlients() {
+    listwificlients(): Promise<IWifiClient[]> {
         const that = this
-        return new Promise(function (resolve, reject) {
+        return new Promise<IWifiClient[]>(function (resolve, reject) {
 
-            getwifiinterfa(that.liconfig.wifi_interface).then(function (interf) {
-
-                listwificlients(interf.interface).then((a) => {
-                    resolve(a)
-                }).catch((err) => {
-                    reject(err)
-                })
-
+            that.hostapd.listwificlients().then((a) => {
+                resolve(a)
             }).catch((err) => {
+                console.log(err)
                 reject(err)
             })
+
         })
     }
 
@@ -732,7 +734,7 @@ export default class LiNetwork {
                                                                 that.recovery(true)
                                                             })
                                                         } else {
-                                                            listwificlients(wifi_exist).then((a) => {
+                                                            that.hostapd.listwificlients().then((a) => {
                                                                 if (a.length === 0) {
                                                                     that.recovery(true)
                                                                 }
