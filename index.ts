@@ -637,7 +637,23 @@ export default class LiNetwork {
     };
 
 
+    listwificlients() {
+        const that = this
+        return new Promise(function (resolve, reject) {
 
+            getwifiinterfa(that.liconfig.wifi_interface).then(function (interf) {
+
+                listwificlients(interf.interface).then((a) => {
+                    resolve(a)
+                }).catch((err) => {
+                    reject(err)
+                })
+
+            }).catch((err) => {
+                reject(err)
+            })
+        })
+    }
 
 
     connection() {
