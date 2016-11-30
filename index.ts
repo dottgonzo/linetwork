@@ -9,6 +9,7 @@ import hostapdswitch from "hostapd_switch";
 import testinternet from "promise-test-connection";
 import merge from "json-add";
 import Wvdial from "wvdialjs";
+import listwificlients from "listwificlients"
 
 
 import netw from "netw";
@@ -689,7 +690,7 @@ export default class LiNetwork {
 
                                     if (that.liconfig.mobile) {
 
-                                that.mobileconnect()
+                                        that.mobileconnect()
 
                                     }
 
@@ -715,13 +716,21 @@ export default class LiNetwork {
                                                                 that.recovery(true)
                                                             })
                                                         } else {
+                                                            listwificlients(wifi_exist).then((a) => {
+                                                                if (a.length === 0) {
+                                                                    that.recovery(true)
+                                                                }
+                                                            }).catch((err) => {
+                                                                console.log(err)
+                                                            })
+
                                                             console.log('no knwown wlan available, waiting for networks')
                                                         }
                                                     }).catch((err) => {
                                                         console.log(err)
                                                     })
 
-                                                }, 90000)
+                                                }, 120000)
 
                                             }
 

@@ -1,6 +1,6 @@
 {
   "name": "linetwork",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -43,6 +43,7 @@
     "hostapd_switch": "^0.2.3",
     "hwrestart": "^0.0.12",
     "json-add": "^0.1.0",
+    "listwificlients": "0.0.2",
     "lodash": "^3.10.1",
     "mobile-providers": "^1.0.1",
     "netw": "^0.1.0",
