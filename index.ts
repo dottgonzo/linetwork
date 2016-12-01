@@ -718,39 +718,41 @@ export default class LiNetwork {
                                             verb(answer, "info", "LINETWORKING recovery mode start");
 
 
-                                                const scannet = setInterval(() => {
-                                                    console.log('check for availables networks')
-                                                    that.wificonnectables().then((nets) => {
-                                                        if (nets.length > 0 && !that.liconfig.mobile) {
+                                            const scannet = setInterval(() => {
+                                                console.log('check for availables networks')
+                                                that.wificonnectables().then((nets) => {
+                                                    if (nets.length > 0 && !that.liconfig.mobile) {
 
-                                                            that.hostapd.client(true).then(function (answer) {
-                                                                that.mode = 'client'
-                                                                clearInterval(scannet)
-                                                                console.log('connected')
+                                                        that.hostapd.client(true).then(function (answer) {
+                                                            that.mode = 'client'
+                                                            clearInterval(scannet)
+                                                            console.log('connected')
 
-                                                                resolve({ conection: true, recovery: false });
-                                                            }).catch((err) => {
-                                                                console.log('no working networks for now')
+                                                            resolve({ conection: true, recovery: false });
+                                                        }).catch((err) => {
+                                                            console.log('no working networks for now')
+                                                            that.recovery(true)
+                                                        })
+                                                    } else {
+                                                        that.hostapd.listwificlients().then((a) => {
+                                                            if (a.length === 0) {
                                                                 that.recovery(true)
-                                                            })
-                                                        } else {
-                                                            that.hostapd.listwificlients().then((a) => {
-                                                                if (a.length === 0) {
-                                                                    that.recovery(true)
-                                                                }
-                                                            }).catch((err) => {
-                                                                console.log(err)
-                                                            })
+                                                            }
+                                                        }).catch((err) => {
+                                                            console.log('list known networks error', err)
 
-                                                            console.log('no knwown wlan available, waiting for networks')
-                                                        }
-                                                    }).catch((err) => {
-                                                        console.log(err)
-                                                    })
+                                                            console.log(err)
+                                                        })
 
-                                                }, 120000)
+                                                        console.log('no knwown wlan available, waiting for networks')
+                                                    }
+                                                }).catch((err) => {
+                                                    console.log('list known networks error', err)
+                                                })
 
-                                            
+                                            }, 120000)
+
+
 
                                         }).catch(function (err) {
                                             verb(err, "error", "LINETWORKING recovery mode error");
@@ -833,7 +835,7 @@ export default class LiNetwork {
                 }
 
             }).catch(function (err) {
-                reject(err);
+                reject('recoverycheck error' + err);
             });
         });
     };
