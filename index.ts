@@ -839,7 +839,6 @@ export default class LiNetwork {
                 const interf = a.device
                 if (force || !a.known_networks) {
 
-                    console.log('recoveryng ' + a.device.interface)
 
                     that.hostapdconf({
                         interface: a.device.interface,
@@ -854,7 +853,9 @@ export default class LiNetwork {
                         themode = 'host'
                     }
 
-                    recovery_mode(that.hostapd).then(function (answer) {
+                    console.log('recoveryng ' + a.device.interface+' with mode '+themode)
+
+                    recovery_mode(that.hostapd, themode).then(function (answer) {
                         that.mode = answer;
                         resolve(answer);
                     }).catch(function (err) {
