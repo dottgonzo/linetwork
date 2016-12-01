@@ -190,18 +190,28 @@ function getwifiinterfa(setted?: string): Promise<INetwork> {
 }
 
 
-function recovery_mode(apswitch): Promise<Imode> {
+function recovery_mode(apswitch: hostapdswitch, mode?: Imode): Promise<Imode> {
 
 
     return new Promise<Imode>(function (resolve, reject) {
+        if (!mode || mode === 'host') {
+            apswitch.host().then(function (answer) {
+                verb(answer, "warn", "linetwork recovery mode ");
+                resolve('host');
+            }).catch(function (err) {
+                verb(err, "error", "linetwork recovery mode failed");
+                reject(err);
+            });
+        } else if (mode === 'ap') {
+            apswitch.ap().then(function (answer) {
+                verb(answer, "warn", "linetwork recovery mode ");
+                resolve('host');
+            }).catch(function (err) {
+                verb(err, "error", "linetwork recovery mode failed");
+                reject(err);
+            });
+        }
 
-        apswitch.host().then(function (answer) {
-            verb(answer, "warn", "linetwork recovery mode ");
-            resolve('host');
-        }).catch(function (err) {
-            verb(err, "error", "linetwork recovery mode failed");
-            reject(err);
-        });
     });
 }
 
@@ -836,6 +846,13 @@ export default class LiNetwork {
                         wpasupplicant_path: that.liconfig.wpasupplicant_path,
                         hostapd: that.liconfig.hostapd
                     })
+
+                    let themode;
+                    if (that.mode === 'wv') {
+                        themode = 'ap'
+                    } else {
+                        themode = 'host'
+                    }
 
                     recovery_mode(that.hostapd).then(function (answer) {
                         that.mode = answer;
