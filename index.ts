@@ -716,12 +716,12 @@ export default class LiNetwork {
                                     if (recovery && wifi_exist) {
                                         that.recovery(true).then(function (answer) {
                                             verb(answer, "info", "LINETWORKING recovery mode start");
-                                            if (!that.liconfig.mobile) {
+
 
                                                 const scannet = setInterval(() => {
                                                     console.log('check for availables networks')
                                                     that.wificonnectables().then((nets) => {
-                                                        if (nets.length > 0) {
+                                                        if (nets.length > 0 && !that.liconfig.mobile) {
 
                                                             that.hostapd.client(true).then(function (answer) {
                                                                 that.mode = 'client'
@@ -750,7 +750,7 @@ export default class LiNetwork {
 
                                                 }, 120000)
 
-                                            }
+                                            
 
                                         }).catch(function (err) {
                                             verb(err, "error", "LINETWORKING recovery mode error");
