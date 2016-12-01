@@ -734,17 +734,20 @@ export default class LiNetwork {
                                                             that.recovery(true)
                                                         })
                                                     } else {
-                                                        that.hostapd.listwificlients().then((a) => {
-                                                            if (a.length === 0) {
-                                                                that.recovery(true)
-                                                            }
-                                                        }).catch((err) => {
-                                                            console.log('list known networks error', err)
+                                                        //   that.hostapd.listwificlients().then((a) => {
+                                                        //       if (a.length === 0) {
+                                                        //           that.recovery(true)
+                                                        //       }
+                                                        //   }).catch((err) => {
+                                                        //       console.log('list known networks error', err)
+                                                        //       console.log(err)
+                                                        //   })
+                                                        if (that.liconfig.mobile) {
+                                                            console.log('stayng on mobile')
+                                                        } else {
+                                                            console.log('no knwown wlan available, waiting for networks')
 
-                                                            console.log(err)
-                                                        })
-
-                                                        console.log('no knwown wlan available, waiting for networks')
+                                                        }
                                                     }
                                                 }).catch((err) => {
                                                     console.log('list known networks error', err)
