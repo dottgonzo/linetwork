@@ -205,7 +205,7 @@ function recovery_mode(apswitch: hostapdswitch, mode?: Imode): Promise<Imode> {
         } else if (mode === 'ap') {
             apswitch.ap().then(function (answer) {
                 verb(answer, "warn", "linetwork recovery mode ");
-                resolve('host');
+                resolve('ap');
             }).catch(function (err) {
                 verb(err, "error", "linetwork recovery mode failed");
                 reject(err);
