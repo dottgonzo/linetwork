@@ -706,16 +706,15 @@ export default class LiNetwork {
                                 }).catch(function (err) {
 
 
-                                    if (that.liconfig.mobile) {
-
-                                        that.mobileconnect(true)
-
-                                    }
 
 
                                     if (recovery && wifi_exist) {
                                         that.recovery(true).then(function (answer) {
                                             verb(answer, "info", "LINETWORKING recovery mode start");
+
+                                            if (that.liconfig.mobile) {
+                                                that.mobileconnect(true)
+                                            }
 
 
                                             const scannet = setInterval(() => {
@@ -761,11 +760,23 @@ export default class LiNetwork {
                                             verb(err, "error", "LINETWORKING recovery mode error");
                                             reject('recovery mode error')
 
+                                            if (that.liconfig.mobile) {
+                                                that.mobileconnect(true)
+                                            }
 
                                         });
                                     } else {
-                                        console.log('not connected')
-                                        reject('not connected')
+
+
+                                        if (that.liconfig.mobile) {
+                                            that.mobileconnect(true)
+                                        } else {
+
+                                            console.log('not connected')
+                                            reject('not connected')
+                                        }
+
+
 
                                     }
                                 });
