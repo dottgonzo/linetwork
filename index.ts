@@ -380,7 +380,7 @@ export default class LiNetwork {
 
     }
 
-    mobileconnect(reset?: boolean) {
+    mobileconnect(reset?: true) {
         const that = this
         that.mobile.configure(reset).then(function () {
             that.mode = "wv";
@@ -708,7 +708,7 @@ export default class LiNetwork {
 
                                     if (that.liconfig.mobile) {
 
-                                        that.mobileconnect()
+                                        that.mobileconnect(true)
 
                                     }
 
@@ -772,7 +772,7 @@ export default class LiNetwork {
 
                             if (that.liconfig.mobile) {
 
-                                that.mobileconnect()
+                                that.mobileconnect(true)
 
                             } else {
                                 console.log("no wifi!!???")

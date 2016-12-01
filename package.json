@@ -1,6 +1,6 @@
 {
   "name": "linetwork",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -50,6 +50,6 @@
     "promised-exec": "^1.0.1",
     "verbo": "0.0.9",
     "wpasupplicant-manager": "^0.0.8",
-    "wvdialjs": "0.0.94"
+    "wvdialjs": "0.0.96"
   }
 }
