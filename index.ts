@@ -847,7 +847,7 @@ export default class LiNetwork {
                     })
 
                     let themode;
-                    if (that.mode === 'wv') {
+                    if (that.liconfig.mobile) {
                         themode = 'ap'
                     } else {
                         themode = 'host'
