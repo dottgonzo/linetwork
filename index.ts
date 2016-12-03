@@ -345,9 +345,10 @@ export default class LiNetwork {
                                     } else {
                                         that.testinternet().then(() => {
                                             connected = true
-
                                             cb()
-                                        })
+                                        }).catch(function (e) {
+                                            cb()
+                                        });
 
                                     }
                                 })
@@ -853,7 +854,7 @@ export default class LiNetwork {
                         themode = 'host'
                     }
 
-                    console.log('recoveryng ' + a.device.interface+' with mode '+themode)
+                    console.log('recoveryng ' + a.device.interface + ' with mode ' + themode)
 
                     recovery_mode(that.hostapd, themode).then(function (answer) {
                         that.mode = answer;
