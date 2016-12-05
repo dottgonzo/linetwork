@@ -89,7 +89,7 @@ interface IEthernet {
 interface ILiNetworkConf {
     wifi_interface: string;
     mobile?: IMobile;
-    hostapd: IHostapd;
+    hostapd?: IHostapd;
     wpasupplicant_path?: string;
     ethernet?: IEthernet[],
     recovery: boolean
@@ -280,11 +280,8 @@ export default class LiNetwork {
 
 
         const config: ILiNetworkConf = {
-            hostapd: {
-                driver: "nl80211",
-                ssid: "testttap",
-                wpa_passphrase: "testpass"
-            },
+
+
             wifi_interface: "auto",
             wpasupplicant_path: "/etc/wpa_supplicant/wpa_supplicant.conf",
             ethernet: [{
@@ -292,6 +289,19 @@ export default class LiNetwork {
             }],
             recovery: true
         };
+
+
+
+        const hostapddefault = {
+            driver: "nl80211",
+            ssid: "testttap",
+            wpa_passphrase: "testpass"
+        }
+
+
+        if (data && (data.wifi_interface || data.hostapd)) {
+            config.hostapd = hostapddefault
+        }
 
         merge(config, data); // combine default settings with new parameters from data
         this.mode = 'unmanaged'
@@ -693,122 +703,162 @@ export default class LiNetwork {
 
                     }).catch(() => {
 
-                        getwifiinterfa(that.liconfig.wifi_interface).then(function (interf) {
 
-                            const wifi_exist: string = interf.interface;
+                        if (that.liconfig.hostapd) {
 
-                            const confhapds = {
-                                interface: wifi_exist,
-                                wpasupplicant_path: that.liconfig.wpasupplicant_path,
-                                hostapd: that.liconfig.hostapd
-                            };
+                            getwifiinterfa(that.liconfig.wifi_interface).then(function (interf) {
 
-                            if (wifi_exist) {
+                                const wifi_exist: string = interf.interface;
 
+                                const confhapds = {
+                                    interface: wifi_exist,
+                                    wpasupplicant_path: that.liconfig.wpasupplicant_path,
+                                    hostapd: that.liconfig.hostapd
+                                };
 
-                                verb(wifi_exist, "info", "Wlan interface founded");
-
-                                that.hostapdconf(confhapds)
+                                if (wifi_exist) {
 
 
-                                that.hostapd.client(true).then(function (answer) {
-                                    that.mode = 'client'
-                                    resolve({ conection: true });
-                                }).catch(function (err) {
+                                    verb(wifi_exist, "info", "Wlan interface founded");
+
+                                    that.hostapdconf(confhapds)
+
+
+                                    that.hostapd.client(true).then(function (answer) {
+                                        that.mode = 'client'
+                                        resolve({ conection: true });
+                                    }).catch(function (err) {
 
 
 
 
-                                    if (recovery && wifi_exist) {
-                                        that.recovery(true).then(function (answer) {
-                                            verb(answer, "info", "LINETWORKING recovery mode start");
+                                        if (recovery) {
+                                            that.recovery(true).then(function (answer) {
+                                                verb(answer, "info", "LINETWORKING recovery mode start");
 
-                                            if (that.liconfig.mobile) {
-                                                that.mobileconnect(true)
-                                            }
+                                                if (that.liconfig.mobile) {
+                                                    that.mobileconnect(true)
+                                                }
 
 
-                                            const scannet = setInterval(() => {
-                                                console.log('check for availables networks')
-                                                that.wificonnectables().then((nets) => {
-                                                    if (nets.length > 0 && !that.liconfig.mobile) {
+                                                const scannet = setInterval(() => {
+                                                    console.log('check for availables networks')
+                                                    that.wificonnectables().then((nets) => {
+                                                        if (nets.length > 0 && !that.liconfig.mobile) {
 
-                                                        that.hostapd.client(true).then(function (answer) {
-                                                            that.mode = 'client'
-                                                            clearInterval(scannet)
-                                                            console.log('connected')
+                                                            that.hostapd.client(true).then(function (answer) {
+                                                                that.mode = 'client'
+                                                                clearInterval(scannet)
+                                                                console.log('connected')
 
-                                                            resolve({ conection: true, recovery: false });
-                                                        }).catch((err) => {
-                                                            console.log('no working networks for now')
-                                                            that.recovery(true)
-                                                        })
-                                                    } else {
-                                                        //   that.hostapd.listwificlients().then((a) => {
-                                                        //       if (a.length === 0) {
-                                                        //           that.recovery(true)
-                                                        //       }
-                                                        //   }).catch((err) => {
-                                                        //       console.log('list known networks error', err)
-                                                        //       console.log(err)
-                                                        //   })
-                                                        if (that.liconfig.mobile) {
-                                                            console.log('stayng on mobile')
+                                                                resolve({ conection: true, recovery: false });
+                                                            }).catch((err) => {
+                                                                console.log('no working networks for now')
+                                                                that.recovery(true)
+                                                            })
                                                         } else {
-                                                            console.log('no knwown wlan available, waiting for networks')
+                                                            //   that.hostapd.listwificlients().then((a) => {
+                                                            //       if (a.length === 0) {
+                                                            //           that.recovery(true)
+                                                            //       }
+                                                            //   }).catch((err) => {
+                                                            //       console.log('list known networks error', err)
+                                                            //       console.log(err)
+                                                            //   })
+                                                            if (that.liconfig.mobile) {
+                                                                console.log('stayng on mobile')
+                                                            } else {
+                                                                console.log('no knwown wlan available, waiting for networks')
 
+                                                            }
                                                         }
-                                                    }
-                                                }).catch((err) => {
-                                                    console.log('list known networks error', err)
-                                                })
+                                                    }).catch((err) => {
+                                                        console.log('list known networks error', err)
+                                                    })
 
-                                            }, 120000)
-
+                                                }, 120000)
 
 
-                                        }).catch(function (err) {
-                                            verb(err, "error", "LINETWORKING recovery mode error");
-                                            reject('recovery mode error')
 
-                                            if (that.liconfig.mobile) {
-                                                that.mobileconnect(true)
-                                            }
+                                            }).catch(function (err) {
+                                                verb(err, "error", "LINETWORKING recovery mode error");
+                                                reject('recovery mode error')
 
-                                        });
-                                    } else {
+                                                if (that.liconfig.mobile) {
+                                                    that.mobileconnect(true)
+                                                }
 
-
-                                        if (that.liconfig.mobile) {
-                                            that.mobileconnect(true)
+                                            });
                                         } else {
 
-                                            console.log('not connected')
-                                            reject('not connected')
+
+                                            if (that.liconfig.mobile) {
+                                                that.mobileconnect(true)
+                                            } else {
+
+                                                console.log('not connected')
+                                                reject('not connected')
+                                            }
+
+
+
                                         }
+                                    });
+                                } else {
+                                    if (that.liconfig.mobile) {
+                                        that.mobileconnect(true)
+                                    } else {
 
+                                        console.log('not connected')
+                                        setTimeout(() => {
+                                            reject('not connected')
 
-
+                                        }, 5000)
                                     }
-                                });
-                            }
+                                }
 
-                        }).catch(function (err) {
+                            }).catch(function (err) {
 
-                            verb("no wifi", "warn", "networker");
+                                verb("no wifi", "warn", "networker");
+
+                                if (that.liconfig.mobile) {
+
+                                    that.mobileconnect(true)
+
+                                } else {
+                                    console.log("no wifi!!???")
+
+
+                                    setTimeout(() => {
+                                        reject('not connected')
+
+                                    }, 5000)
+
+                                }
+
+                            });
+
+                        } else {
+
+
+
 
                             if (that.liconfig.mobile) {
-
                                 that.mobileconnect(true)
-
                             } else {
-                                console.log("no wifi!!???")
-                                hwrestart("unplug")
+                                console.log('no network')
+
+                                setTimeout(() => {
+                                    reject('not connected')
+
+                                }, 5000)
+
                             }
 
-                        });
 
 
+
+                        }
 
                     })
 
