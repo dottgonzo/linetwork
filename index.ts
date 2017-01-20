@@ -99,15 +99,7 @@ interface ILiNetworkConfParams {
     mobile?: IMobile;
     hostapd?: IHostapd;
     wpasupplicant_path?: string;
-    ethernet?: {
-        interface: string;
-        dhcp?: {
-            ip?: string;
-            gateway?: string;
-            netmask?: string;
-            bcast?: string;
-        }
-    },
+    ethernet?: IEthernet[],
     recovery?: true
 }
 
@@ -284,9 +276,7 @@ export default class LiNetwork {
 
             wifi_interface: "auto",
             wpasupplicant_path: "/etc/wpa_supplicant/wpa_supplicant.conf",
-            ethernet: [{
-                interface: 'eth0'
-            }],
+            ethernet: [],
             recovery: true
         };
 
