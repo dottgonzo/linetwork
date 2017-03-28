@@ -45,7 +45,7 @@
     "json-add": "^0.1.0",
     "lodash": "^3.10.1",
     "mobile-providers": "^1.0.1",
-    "netw": "^0.1.0",
+    "netw": "^0.1.6",
     "promise-test-connection": "^0.0.32",
     "promised-exec": "^1.0.1",
     "verbo": "0.0.9",
